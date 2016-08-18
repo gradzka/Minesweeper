@@ -1,0 +1,22 @@
+1000 ICON "saper.ico"
+
+200 MENU
+{
+	POPUP "&Game"
+	{
+		MENUITEM "&New\tF2", 100
+			MENUITEM SEPARATOR
+		MENUITEM "&Beginner", 101
+		MENUITEM "&Intermediate", 102
+		MENUITEM "&Expert", 103
+		MENUITEM "&Custom...", 104
+			MENUITEM SEPARATOR
+		MENUITEM "&High Scores...", 105
+			MENUITEM SEPARATOR
+		MENUITEM "&Exit", 106
+	}
+	POPUP "&Help"
+	{
+		MENUITEM "&About", 107
+	}
+}
