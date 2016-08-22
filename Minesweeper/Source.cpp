@@ -9,6 +9,66 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void GetDesktopResolution(int &horizontal, int &vertical);
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
 
+
+
+
+//Source of Subclassing Example: https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
+#include <Commctrl.h>
+#pragma comment(lib, "Comctl32.lib")
+//
+//  FUNCTION: NewSafeBtnProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR)
+//
+//  PURPOSE:  The new procedure that processes messages for the button control. 
+//  Every time a message is received by the new window procedure, a subclass 
+//  ID and reference data are included.
+//
+char b[32];
+LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	switch (message)
+	{
+	//When Right Button is pushed
+	/*case WM_RBUTTONDOWN:
+
+		// Mouse button right-click event handler
+		//char b[32];
+		_itoa_s(dwRefData, b, 10);
+		MessageBox(hButton, b, "Subclass Example - RBUTTONDOWN", MB_OK);
+
+		// Stop the default message handler.
+		return TRUE;
+		*/
+
+	//When Right Button is released
+	case WM_RBUTTONUP:
+
+		// Mouse button right-click event handler
+		//char b[32];
+		_itoa_s(dwRefData, b, 10);
+		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);
+
+		// Stop the default message handler.
+		return TRUE;
+
+	case WM_NCDESTROY:
+
+		// You must remove your window subclass before the window being 
+		// subclassed is destroyed. This is typically done either by removing 
+		// the subclass once your temporary need has passed, or if you are 
+		// installing a permanent subclass, by inserting a call to 
+		// RemoveWindowSubclass inside the subclass procedure itself:
+		RemoveWindowSubclass(hButton, NewSafeBtnProc, uIdSubclass);
+		return DefSubclassProc(hButton, message, wParam, lParam);
+
+	default:
+		return DefSubclassProc(hButton, message, wParam, lParam);
+	}
+}
+
+
+
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	LPSTR ClassName = "Minesweeper";
@@ -78,6 +138,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//HWND matrix
 	HWND **hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
 
+
+
+
+
+	// Get the handle of the control to be subclassed, and subclass it.
+	for (int i = 0; i <= 100; i++)
+	{
+		if (!SetWindowSubclass(GetDlgItem(hwnd, i), NewSafeBtnProc, 0, i))
+		{
+			DestroyWindow(hwnd);
+		}
+	}
+
+
+
+
+
+
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
 
@@ -92,6 +170,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -132,7 +211,7 @@ HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance)
 
 		for (int j = 0; j < 10; j++)
 		{
-			hwnd_matrix[i][j] = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
+			hwnd_matrix[i][j] = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY,
 				7 + 17 * j, 30 + 17 * i, 17, 17, hwnd, (HMENU)(10 * i + j + 1), hInstance, 0);
 		}
 	}
