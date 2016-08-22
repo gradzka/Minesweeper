@@ -70,7 +70,11 @@
     <Image Include="saper.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="game_board.cpp" />
     <ClCompile Include="Source.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="game_board.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

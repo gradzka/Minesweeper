@@ -10,8 +10,6 @@ void GetDesktopResolution(int &horizontal, int &vertical);
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
 
 
-
-
 //Source of Subclassing Example: https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
