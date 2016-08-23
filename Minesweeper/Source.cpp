@@ -119,6 +119,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	case WM_LBUTTONDOWN:
+		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
+		break;
+
+	case WM_LBUTTONUP:
+		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+		break;
+
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
 		break;
@@ -137,6 +145,14 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 {
 	switch (message)
 	{
+	case WM_LBUTTONDOWN:
+		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
+		return TRUE;
+
+	case WM_LBUTTONUP:
+		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+		return TRUE;
+
 		//When Right Button is released
 	case WM_RBUTTONUP:
 
