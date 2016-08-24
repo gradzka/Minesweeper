@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <string>
+#include "game_board.h"
 
 #define SAPER_LOGO 1000
 #define horizontal_coordinates (horizontal / 2 -  width / 2)
@@ -24,10 +25,17 @@ void load_BITMAP();
 //  Every time a message is received by the new window procedure, a subclass 
 //  ID and reference data are included.
 //
-char b[32];
+
+//char b[32];
 HWND hwnd_smile;
+
+game_board *g_b_gameboard;
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	g_b_gameboard = new game_board(10,10,9); //Custom setting, Game_board 10x10 and 9 mines
+
+
 	LPSTR ClassName = "Minesweeper";
 	MSG Communique;
 
@@ -113,6 +121,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		DispatchMessage(&Communique);
 	}
 	return Communique.wParam;
+
+	delete g_b_gameboard;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -158,8 +168,20 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 		// Mouse button right-click event handler
 		//char b[32];
-		_itoa_s(dwRefData, b, 10);
-		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);
+		/*_itoa_s(dwRefData, b, 10);
+		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
+
+		if (g_b_gameboard->fields[dwRefData / 10][dwRefData % 10 -1].clicked == false)
+		{
+			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
+			g_b_gameboard->fields[dwRefData / 10][dwRefData % 10 - 1].clicked = true;
+		}
+		else
+		{
+			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
+			g_b_gameboard->fields[dwRefData / 10][dwRefData % 10 - 1].clicked = false;
+		}
+		return TRUE;
 
 		// Stop the default message handler.
 		return TRUE;

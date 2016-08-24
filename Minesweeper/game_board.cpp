@@ -73,13 +73,14 @@ game_board::~game_board()
 }
 void game_board::create_fields()
 {
-	fields = new int*[g_b_width];
+	fields = new field*[g_b_width];
 	for (int i = 0; i < g_b_width; i++)
 	{
-		fields[i] = new int[g_b_height];
+		fields[i] = new field[g_b_height];
 		for (int j = 0; j < g_b_height; j++)
 		{
-			fields[i][j] = 0;
+			fields[i][j].value = 0;
+			fields[i][j].clicked = false;
 		}
 	}
 }
@@ -89,7 +90,7 @@ void game_board::show_fields()
 	{
 		for (int j = 0; j < g_b_height; j++)
 		{
-			std::cout << fields[i][j] << "\t";
+			std::cout << fields[i][j].value << "\t";
 		}
 		std::cout << std::endl;
 	}
@@ -109,9 +110,9 @@ void game_board::rand_mines()
 			Y = rand() % g_b_height;
 			/*sprintf_s(bufor, "(%i, %i)", X, Y);
 			std::cout << bufor << std::endl;*/
-		} while (fields[X][Y] == -1);
+		} while (fields[X][Y].value == -1);
 
-		fields[X][Y] = -1;
+		fields[X][Y].value = -1;
 	}
 }
 void game_board::neighbours_mines()
@@ -120,39 +121,39 @@ void game_board::neighbours_mines()
 	{
 		for (int j = 0; j < g_b_height; j++)
 		{
-			if (fields[i][j] == -1)
+			if (fields[i][j].value == -1)
 			{
-				if ((i - 1 >= 0) && (fields[i - 1][j] != -1))
+				if ((i - 1 >= 0) && (fields[i - 1][j].value != -1))
 				{
-					fields[i - 1][j]++; //up
+					fields[i - 1][j].value++; //up
 				}
-				if ((j + 1 < g_b_height) && (fields[i][j + 1] != -1))
+				if ((j + 1 < g_b_height) && (fields[i][j + 1].value != -1))
 				{
-					fields[i][j + 1]++; //right
+					fields[i][j + 1].value++; //right
 				}
-				if ((i + 1 < g_b_width) && (fields[i + 1][j] != -1))
+				if ((i + 1 < g_b_width) && (fields[i + 1][j].value != -1))
 				{
-					fields[i + 1][j]++; //down
+					fields[i + 1][j].value++; //down
 				}
-				if ((j - 1 >= 0) && (fields[i][j - 1] != -1))
+				if ((j - 1 >= 0) && (fields[i][j - 1].value != -1))
 				{
-					fields[i][j - 1]++; //left
+					fields[i][j - 1].value++; //left
 				}
-				if ((i - 1 >= 0) && (j - 1 >= 0) && (fields[i - 1][j - 1] != -1)) //upper left diagonally
+				if ((i - 1 >= 0) && (j - 1 >= 0) && (fields[i - 1][j - 1].value != -1)) //upper left diagonally
 				{
-					fields[i - 1][j - 1]++;
+					fields[i - 1][j - 1].value++;
 				}
-				if ((i - 1 >= 0) && (j + 1 < g_b_height) && (fields[i - 1][j + 1] != -1)) //upper right diagonally
+				if ((i - 1 >= 0) && (j + 1 < g_b_height) && (fields[i - 1][j + 1].value != -1)) //upper right diagonally
 				{
-					fields[i - 1][j + 1]++;
+					fields[i - 1][j + 1].value++;
 				}
-				if ((i + 1 < g_b_width) && (j - 1 >= 0) && (fields[i + 1][j - 1] != -1)) //bottom left diagonally
+				if ((i + 1 < g_b_width) && (j - 1 >= 0) && (fields[i + 1][j - 1].value != -1)) //bottom left diagonally
 				{
-					fields[i + 1][j - 1]++;
+					fields[i + 1][j - 1].value++;
 				}
-				if ((i + 1 < g_b_width) && (j + 1 < g_b_height) && (fields[i + 1][j + 1] != -1)) //bottom right diagonally
+				if ((i + 1 < g_b_width) && (j + 1 < g_b_height) && (fields[i + 1][j + 1].value != -1)) //bottom right diagonally
 				{
-					fields[i + 1][j + 1]++;
+					fields[i + 1][j + 1].value++;
 				}
 			}
 		}
