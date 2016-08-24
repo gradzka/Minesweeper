@@ -30,6 +30,8 @@ void load_BITMAP();
 HWND hwnd_smile;
 
 game_board *g_b_gameboard;
+int g_b_X = 0;
+int g_b_Y = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -170,16 +172,19 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		//char b[32];
 		/*_itoa_s(dwRefData, b, 10);
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
+		g_b_X = dwRefData / 10;
+		g_b_Y = dwRefData % 10 - 1;
+		if (g_b_Y < 0) { g_b_Y = 0; }
 
-		if (g_b_gameboard->fields[dwRefData / 10][dwRefData % 10 -1].clicked == false)
+		if (g_b_gameboard->fields[g_b_X][g_b_Y].clicked == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
-			g_b_gameboard->fields[dwRefData / 10][dwRefData % 10 - 1].clicked = true;
+			g_b_gameboard->fields[g_b_X][g_b_Y].clicked = true;
 		}
 		else
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
-			g_b_gameboard->fields[dwRefData / 10][dwRefData % 10 - 1].clicked = false;
+			g_b_gameboard->fields[g_b_X][g_b_Y].clicked = false;
 		}
 		return TRUE;
 
