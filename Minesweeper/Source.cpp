@@ -26,12 +26,15 @@ void load_BITMAP();
 //  ID and reference data are included.
 //
 
-//char b[32];
+char b[32];
 HWND hwnd_smile;
 
 game_board *g_b_gameboard;
 int g_b_X = 0;
 int g_b_Y = 0;
+
+HWND **hwnd_matrix;
+bool GAME_OVER = false;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -96,17 +99,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
-		width / 2 - 22, 5, 26, 26, hwnd, (HMENU)0, hInstance, 0);
+		width / 2 - 22, 5, 26, 26, hwnd, (HMENU)100, hInstance, 0);
 
 	//HBITMAP hbit = (HBITMAP)LoadImage(NULL, "BMPs\\smile.bmp", IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	load_BITMAP();
 	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 
 	//HWND matrix
-	HWND **hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
+	hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
 
 	// Get the handle of the control to be subclassed, and subclass it.
-	for (int i = 1; i <= 100; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		if (!SetWindowSubclass(GetDlgItem(hwnd, i), NewSafeBtnProc, 0, i))
 		{
@@ -162,8 +165,84 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		return TRUE;
 
 	case WM_LBUTTONUP:
-		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
-		return TRUE;
+
+		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //change smile
+
+		g_b_X = dwRefData / 10;
+		g_b_Y = dwRefData%10;
+
+		/*_itoa_s(g_b_X, b, 10);
+		MessageBox(hButton, b, "X", MB_OK);
+
+		_itoa_s(g_b_Y, b, 10);
+		MessageBox(hButton, b, "Y", MB_OK);*/
+
+
+		if (g_b_gameboard->fields[g_b_X][g_b_Y].discovered == false && g_b_gameboard->fields[g_b_X][g_b_Y].flagged == false) //if button wasn't discovered
+		{
+			g_b_gameboard->fields[g_b_X][g_b_Y].discovered = true;
+			//dwRefData == 1 &&
+			switch (g_b_gameboard->fields[g_b_X][g_b_Y].value)
+			{
+			case -1:
+			{
+				if (GAME_OVER == false){
+					SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
+
+					for (int i = 0; i < 10; i++)
+					{
+						for (int j = 0; j < 10; j++)
+						{
+							if (g_b_gameboard->fields[i][j].value == -1 && g_b_gameboard->fields[i][j].discovered == false)
+							{
+								SendMessage(hwnd_matrix[i][j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
+								g_b_gameboard->fields[i][j].discovered = true;
+								g_b_gameboard->fields[i][j].flagged = true;
+							}
+							else
+							{
+								g_b_gameboard->fields[i][j].discovered = true;
+								g_b_gameboard->fields[i][j].flagged = true;
+							}
+						}
+					}
+					GAME_OVER = true;
+					MessageBox(hButton, "You have discovered mine!", "GAME OVER", MB_OK);
+				}
+			}
+				break;
+			case 1:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[1]);
+				break;
+			case 2:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[2]);
+				break;
+			case 3:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[3]);
+				break;
+			case 4:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[4]);
+				break;
+			case 5:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[5]);
+				break;
+			case 6:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[6]);
+				break;
+			case 7:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[7]);
+				break;
+			case 8:
+				SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[8]);
+				break;
+
+			default:
+				break;
+			}
+			
+		}
+
+			return TRUE;
 
 		//When Right Button is released
 	case WM_RBUTTONUP:
@@ -173,18 +252,17 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		/*_itoa_s(dwRefData, b, 10);
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
 		g_b_X = dwRefData / 10;
-		g_b_Y = dwRefData % 10 - 1;
-		if (g_b_Y < 0) { g_b_Y = 0; }
+		g_b_Y = dwRefData % 10;
 
-		if (g_b_gameboard->fields[g_b_X][g_b_Y].clicked == false)
+		if (g_b_gameboard->fields[g_b_X][g_b_Y].flagged == false && g_b_gameboard->fields[g_b_X][g_b_Y].discovered == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
-			g_b_gameboard->fields[g_b_X][g_b_Y].clicked = true;
+			g_b_gameboard->fields[g_b_X][g_b_Y].flagged = true;
 		}
-		else
+		else if (g_b_gameboard->fields[g_b_X][g_b_Y].flagged == true)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
-			g_b_gameboard->fields[g_b_X][g_b_Y].clicked = false;
+			g_b_gameboard->fields[g_b_X][g_b_Y].flagged = false;
 		}
 		return TRUE;
 
@@ -232,7 +310,7 @@ HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance)
 		for (int j = 0; j < 10; j++)
 		{
 			hwnd_matrix[i][j] = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY | BS_PUSHBUTTON,
-				12 + 16 * j, 36 + 16 * i, 16, 16, hwnd, (HMENU)(10 * i + j + 1), hInstance, 0);
+				12 + 16 * j, 36 + 16 * i, 16, 16, hwnd, (HMENU)(10 * i + j), hInstance, 0);
 		}
 	}
 	return hwnd_matrix;

@@ -5,8 +5,9 @@
 
 struct field
 {
-	int value;
-	bool clicked;
+	int value;		//-1 mine, 0..8 mine neighbour
+	bool flagged;	//flag is set
+	bool discovered;//player discover the value of field
 };
 #pragma once
 class game_board

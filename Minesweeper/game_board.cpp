@@ -80,7 +80,8 @@ void game_board::create_fields()
 		for (int j = 0; j < g_b_height; j++)
 		{
 			fields[i][j].value = 0;
-			fields[i][j].clicked = false;
+			fields[i][j].flagged = false;
+			fields[i][j].discovered = false;
 		}
 	}
 }
