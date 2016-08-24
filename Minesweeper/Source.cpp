@@ -8,6 +8,11 @@
 
 HBITMAP hbit_BMPs[16];
 
+
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
@@ -27,20 +32,16 @@ void load_BITMAP();
 //
 
 char b[32];
-HWND hwnd_smile;
 
 game_board *g_b_gameboard;
 int g_b_X = 0;
 int g_b_Y = 0;
 
-HWND **hwnd_matrix;
 bool GAME_OVER = false;
+HWND hwnd;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	g_b_gameboard = new game_board(10,10,9); //Custom setting, Game_board 10x10 and 9 mines
-
-
 	LPSTR ClassName = "Minesweeper";
 	MSG Communique;
 
@@ -78,7 +79,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HMENU hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(200));
 
 	// Creating window
-	HWND hwnd = CreateWindowEx(
+	hwnd = CreateWindowEx(
 		WS_EX_WINDOWEDGE,
 		ClassName,
 		ClassName,
@@ -98,15 +99,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 1;
 	}
 
-	hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
-		width / 2 - 22, 5, 26, 26, hwnd, (HMENU)100, hInstance, 0);
+	HWND hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
+		width / 2 - 22, 5, 26, 26, hwnd, (HMENU)-1, hInstance, 0);
 
 	//HBITMAP hbit = (HBITMAP)LoadImage(NULL, "BMPs\\smile.bmp", IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	load_BITMAP();
 	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 
 	//HWND matrix
-	hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
+	HWND **hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
+
+	g_b_gameboard = new game_board(10, 10, 10); //Custom setting, Game_board 10x10 and 9 mines
 
 	// Get the handle of the control to be subclassed, and subclass it.
 	for (int i = 0; i < 100; i++)
@@ -135,11 +138,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_LBUTTONDOWN:
-		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
+		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
 		break;
 
 	case WM_LBUTTONUP:
-		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 		break;
 
 	case WM_CLOSE:
@@ -150,6 +153,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 
+	case WM_COMMAND:
+		switch (HIWORD(wParam))
+		{
+		case BN_CLICKED:
+			// see which button was clicked
+			if ((HWND)lParam == GetDlgItem(hwnd, -1))
+			{
+				delete g_b_gameboard;
+				g_b_gameboard = new game_board(10, 10, 10); //Custom setting, Game_board 10x10 and 9 mines
+				GAME_OVER = false;
+				for (int i = 0; i < 100; i++)
+				{
+					SendMessage(GetDlgItem(hwnd, i), BM_SETSTATE, FALSE, NULL);
+					SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
+				}
+				InvalidateRect(hwnd, NULL, FALSE);
+			}
+			break;
+		}
+		break;
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
@@ -161,15 +184,22 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 	switch (message)
 	{
 	case WM_LBUTTONDOWN:
-		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
+		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
 		return TRUE;
 
 	case WM_LBUTTONUP:
 
-		SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //change smile
-
+		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //change smile
+		if (GAME_OVER == true)
+		{
+			break;
+		}
+		
 		g_b_X = dwRefData / 10;
 		g_b_Y = dwRefData%10;
+
+		if (g_b_gameboard->fields[g_b_X][g_b_Y].flagged == false)
+		SendMessage(hButton, BM_SETSTATE, TRUE, NULL);
 
 		/*_itoa_s(g_b_X, b, 10);
 		MessageBox(hButton, b, "X", MB_OK);
@@ -195,7 +225,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 						{
 							if (g_b_gameboard->fields[i][j].value == -1 && g_b_gameboard->fields[i][j].discovered == false)
 							{
-								SendMessage(hwnd_matrix[i][j], BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
+								SendMessage(GetDlgItem(hwnd, 10 * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
 								g_b_gameboard->fields[i][j].discovered = true;
 								g_b_gameboard->fields[i][j].flagged = true;
 							}
