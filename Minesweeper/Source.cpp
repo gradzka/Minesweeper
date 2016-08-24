@@ -259,7 +259,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
 			g_b_gameboard->fields[g_b_X][g_b_Y].flagged = true;
 		}
-		else if (g_b_gameboard->fields[g_b_X][g_b_Y].flagged == true)
+		else if (g_b_gameboard->fields[g_b_X][g_b_Y].flagged == true && GAME_OVER==false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
 			g_b_gameboard->fields[g_b_X][g_b_Y].flagged = false;
