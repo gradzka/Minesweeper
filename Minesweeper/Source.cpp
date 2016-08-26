@@ -8,7 +8,10 @@
 
 HBITMAP hbit_BMPs[16];
 
+
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
@@ -17,6 +20,7 @@ void GetDesktopResolution(int &horizontal, int &vertical);
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
 void load_BITMAP();
 void check_neigbours(DWORD_PTR dwRefData);
+void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y);
 
 //Source of Subclassing Example: https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
 #include <Commctrl.h>
@@ -378,55 +382,55 @@ void check_neigbours(DWORD_PTR dwRefData)
 {
 	int g_b_X = dwRefData / g_b_gameboard->g_b_height;
 	int g_b_Y = dwRefData % g_b_gameboard->g_b_width;
-
-	if ((g_b_X - 1 >= 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y].value == 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y].discovered == false))//up
+	//Do ifów
+	if ((g_b_X - 1 >= 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y].discovered == false) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y].flagged == false))//up
 	{
 		g_b_gameboard->fields[g_b_X - 1][g_b_Y].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y);
+		neighbour_value((g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y, g_b_X - 1, g_b_Y);
 
 	}
-	if ((g_b_Y + 1 < g_b_gameboard->g_b_height) && (g_b_gameboard->fields[g_b_X][g_b_Y + 1].value == 0) && (g_b_gameboard->fields[g_b_X][g_b_Y + 1].discovered == false))//right
+	if ((g_b_Y + 1 < g_b_gameboard->g_b_height) && (g_b_gameboard->fields[g_b_X][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X][g_b_Y + 1].flagged == false))//right
 	{
 		g_b_gameboard->fields[g_b_X][g_b_Y + 1].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X)*g_b_gameboard->g_b_height + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X)*g_b_gameboard->g_b_height + g_b_Y + 1);
+		neighbour_value((g_b_X)*g_b_gameboard->g_b_height + g_b_Y + 1, g_b_X, g_b_Y + 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->g_b_width) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y].value == 0) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y].discovered == false))//down
+	if ((g_b_X + 1 < g_b_gameboard->g_b_width) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y].flagged == false))//down
 	{
 		g_b_gameboard->fields[g_b_X + 1][g_b_Y].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y);
+		neighbour_value((g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y, g_b_X + 1, g_b_Y);
 	}
-	if ((g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X][g_b_Y - 1].value == 0) && (g_b_gameboard->fields[g_b_X][g_b_Y - 1].discovered == false))//left
+	if ((g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X][g_b_Y - 1].discovered == false) && (g_b_gameboard->fields[g_b_X][g_b_Y - 1].flagged == false))//left
 	{
 		g_b_gameboard->fields[g_b_X][g_b_Y - 1].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X)*g_b_gameboard->g_b_height + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X)*g_b_gameboard->g_b_height + g_b_Y - 1);
+		neighbour_value((g_b_X)*g_b_gameboard->g_b_height + g_b_Y - 1, g_b_X, g_b_Y - 1);
 	}
-	if ((g_b_X - 1 >= 0) && (g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].value == 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].discovered == false)) //upper left diagonally
+	if ((g_b_X - 1 >= 0) && (g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].discovered == false) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].flagged == false)) //upper left diagonally
 	{
 		g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y - 1);
+		neighbour_value((g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y - 1, g_b_X - 1, g_b_Y - 1);
 	}
-	if ((g_b_X - 1 >= 0) && (g_b_Y + 1 < g_b_gameboard->g_b_height) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].value == 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].discovered == false)) //upper right diagonally
+	if ((g_b_X - 1 >= 0) && (g_b_Y + 1 < g_b_gameboard->g_b_height) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].flagged == false)) //upper right diagonally
 	{
 		g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y + 1);
+		neighbour_value((g_b_X - 1)*g_b_gameboard->g_b_height + g_b_Y + 1, g_b_X - 1, g_b_Y + 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->g_b_width) && (g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].value == 0) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].discovered == false)) //bottom left diagonally
+	if ((g_b_X + 1 < g_b_gameboard->g_b_width) && (g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].flagged == false)) //bottom left diagonally
 	{
 		g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y - 1);
+		neighbour_value((g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y - 1, g_b_X + 1, g_b_Y - 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->g_b_width) && (g_b_Y + 1 < g_b_gameboard->g_b_height) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].value == 0) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered == false)) //bottom right diagonally
+	if ((g_b_X + 1 < g_b_gameboard->g_b_width) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].value == 0) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].flagged == false)) //bottom right diagonally
 	{
 		g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
-		check_neigbours((g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y + 1);
+		neighbour_value((g_b_X + 1)*g_b_gameboard->g_b_height + g_b_Y + 1, g_b_X + 1, g_b_Y + 1);
 	}
 
 }
