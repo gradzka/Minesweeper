@@ -13,12 +13,13 @@ struct field
 class game_board
 {
 private:
-	int g_b_width;
-	int g_b_height;
+	
 	std::string beg_int_exp;
 	int mines_number;
 public:
 	field **fields; //to improve, prefferd private
+	int g_b_width; //to improve, prefferd private
+	int g_b_height; //to improve, prefferd private
 
 	game_board(std::string beg_int_exp);
 	game_board(int X_width, int Y_height, int mines_number);
