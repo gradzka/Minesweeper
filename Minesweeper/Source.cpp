@@ -49,13 +49,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	LPSTR ClassName = "Minesweeper";
 	MSG Communique;
 
+	g_b_gameboard = new game_board("Beginner");
+
 	//screen sizes, GetDesktopResolution will update them
 	int horizontal = 0;
 	int vertical = 0;
 
 	//window sizes
-	int width = 200;
-	int height = 270;
+	int width = 18 + 16 * g_b_gameboard->g_b_height;
+	int height = 98 + 16 * g_b_gameboard->g_b_width;
 
 	WNDCLASSEX wc;
 	wc.cbSize = sizeof(WNDCLASSEX);
@@ -99,7 +101,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	if (hwnd == NULL)
 	{
-		MessageBox(NULL, "Error", "Window Error", MB_ICONEXCLAMATION);
 		return 1;
 	}
 
@@ -110,13 +111,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	load_BITMAP();
 	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 
+	//g_b_gameboard = new game_board(10, 10, 10); //Custom setting, Game_board 10x10 and 9 mines
+
+
 	//HWND matrix
 	HWND **hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
 
-	g_b_gameboard = new game_board(10, 10, 10); //Custom setting, Game_board 10x10 and 9 mines
-
-	// Get the handle of the control to be subclassed, and subclass it.
-	for (int i = 0; i < 100; i++)
+		// Get the handle of the control to be subclassed, and subclass it.
+	for (int i = 0; i < g_b_gameboard->g_b_width*g_b_gameboard->g_b_height; i++)
 	{
 		if (!SetWindowSubclass(GetDlgItem(hwnd, i), NewSafeBtnProc, 0, i))
 		{
@@ -265,8 +267,8 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		{
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //change smile
 
-			gl_g_b_X = dwRefData / 10;
-			gl_g_b_Y = dwRefData % 10;
+			gl_g_b_X = dwRefData / g_b_gameboard->g_b_width;
+			gl_g_b_Y = dwRefData % g_b_gameboard->g_b_height;
 
 			if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == false)
 				SendMessage(hButton, BM_SETSTATE, TRUE, NULL);
@@ -276,7 +278,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 			_itoa_s(gl_g_b_Y, b, 10);
 			MessageBox(hButton, b, "Y", MB_OK);*/
-
+			
 
 			if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].discovered == false && g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == false) //if button wasn't discovered
 			{
@@ -290,20 +292,20 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 						SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
 						SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
 
-						for (int i = 0; i < 10; i++)
+						for (int i = 0; i < g_b_gameboard->g_b_width; i++)
 						{
-							for (int j = 0; j < 10; j++)
+							for (int j = 0; j < g_b_gameboard->g_b_height; j++)
 							{
 								if (g_b_gameboard->fields[i][j].value == -1 && g_b_gameboard->fields[i][j].discovered == false)
 								{
 									if (g_b_gameboard->fields[i][j].flagged == false)
 									{
-										SendMessage(GetDlgItem(hwnd, 10 * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
+										SendMessage(GetDlgItem(hwnd, g_b_gameboard->g_b_width * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
 									}
 								}
 								else if (g_b_gameboard->fields[i][j].value != -1 && g_b_gameboard->fields[i][j].flagged == true)
 								{
-									SendMessage(GetDlgItem(hwnd, 10 * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
+									SendMessage(GetDlgItem(hwnd, g_b_gameboard->g_b_width * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
 								}
 
 							}
@@ -357,8 +359,8 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		//char b[32];
 		/*_itoa_s(dwRefData, b, 10);
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
-		gl_g_b_X = dwRefData / 10;
-		gl_g_b_Y = dwRefData % 10;
+		gl_g_b_X = dwRefData / g_b_gameboard->g_b_width;
+		gl_g_b_Y = dwRefData % g_b_gameboard->g_b_height;
 
 		if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == false && g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].discovered == false)
 		{
@@ -406,17 +408,19 @@ void GetDesktopResolution(int &horizontal, int &vertical)
 }
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance)
 {
+	int button_number = 0;
 	//HWND matrix
-	HWND **hwnd_matrix = new HWND *[10];
+	HWND **hwnd_matrix = new HWND *[g_b_gameboard->g_b_width];
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < g_b_gameboard->g_b_width; i++)
 	{
-		hwnd_matrix[i] = new HWND[10];
+		hwnd_matrix[i] = new HWND[g_b_gameboard->g_b_height];
 
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < g_b_gameboard->g_b_height; j++)
 		{
 			hwnd_matrix[i][j] = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP | BS_NOTIFY | BS_PUSHBUTTON,
-				12 + 16 * j, 36 + 16 * i, 16, 16, hwnd, (HMENU)(10 * i + j), hInstance, 0);
+				1 + 16 * j, 35 + 16 * i, 16, 16, hwnd, (HMENU)button_number, hInstance, 0);
+			button_number++;
 		}
 	}
 	return hwnd_matrix;
@@ -545,7 +549,7 @@ void new_game()
 	delete g_b_gameboard;
 	g_b_gameboard = new game_board(10, 10, 10); //Custom setting, Game_board 10x10 and 9 mines
 	GAME_OVER = false;
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < g_b_gameboard->g_b_width*g_b_gameboard->g_b_height; i++)
 	{
 		SendMessage(GetDlgItem(hwnd, i), BM_SETSTATE, FALSE, NULL);
 		SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
