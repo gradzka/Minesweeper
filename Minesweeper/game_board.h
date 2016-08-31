@@ -14,9 +14,10 @@ class game_board
 {
 private:
 	
-	std::string beg_int_exp;
+	
 	int mines_number;
 public:
+	std::string beg_int_exp_cus; //to improve, prefferd private
 	field **fields; //to improve, prefferd private
 	int g_b_width; //to improve, prefferd private
 	int g_b_height; //to improve, prefferd private

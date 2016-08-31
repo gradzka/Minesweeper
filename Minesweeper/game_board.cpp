@@ -1,23 +1,23 @@
 #include "game_board.h"
 
-game_board::game_board(std::string beg_int_exp)
+game_board::game_board(std::string beg_int_exp_cus)
 {
 	fields = NULL;
-	this->beg_int_exp = beg_int_exp;
+	this->beg_int_exp_cus = beg_int_exp_cus;
 
-	if (beg_int_exp.compare("Beginner") == 0)
+	if (this->beg_int_exp_cus.compare("Beginner") == 0)
 	{
 		g_b_width = 9;
 		g_b_height = 9;
 		mines_number = 10;
 	}
-	if (beg_int_exp.compare("Intermediate") == 0)
+	if (this->beg_int_exp_cus.compare("Intermediate") == 0)
 	{
 		g_b_width = 16;
 		g_b_height = 16;
 		mines_number = 40;
 	}
-	if (beg_int_exp.compare("Expert") == 0)
+	if (this->beg_int_exp_cus.compare("Expert") == 0)
 	{
 		g_b_width = 30;
 		g_b_height = 16;
@@ -38,7 +38,7 @@ game_board::game_board(int X_width, int Y_height, int mines_number)
 	max number is (A-1)x(B-1)
 	*/
 	fields = NULL;
-	beg_int_exp = "Custom";
+	beg_int_exp_cus = "Custom";
 
 	if (X_width < 9) X_width = 9;
 	else if (X_width > 30) X_width = 30;
