@@ -277,8 +277,8 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == false)
 				SendMessage(hButton, BM_SETSTATE, TRUE, NULL);
 
-			_itoa_s(dwRefData, b, 10);
-			MessageBox(hButton, b, "X", MB_OK);
+			/*_itoa_s(dwRefData, b, 10);
+			MessageBox(hButton, b, "X", MB_OK);*/
 			/*
 			_itoa_s(gl_g_b_Y, b, 10);
 			MessageBox(hButton, b, "Y", MB_OK);*/
@@ -304,12 +304,12 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 								{
 									if (g_b_gameboard->fields[i][j].flagged == false)
 									{
-										SendMessage(GetDlgItem(hwnd, g_b_gameboard->g_b_rows * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
+										SendMessage(GetDlgItem(hwnd, g_b_gameboard->g_b_columns * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
 									}
 								}
 								else if (g_b_gameboard->fields[i][j].value != -1 && g_b_gameboard->fields[i][j].flagged == true)
 								{
-									SendMessage(GetDlgItem(hwnd, g_b_gameboard->g_b_rows * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
+									SendMessage(GetDlgItem(hwnd, g_b_gameboard->g_b_columns * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
 								}
 
 							}
