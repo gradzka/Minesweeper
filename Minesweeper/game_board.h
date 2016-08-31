@@ -19,11 +19,11 @@ private:
 public:
 	std::string beg_int_exp_cus; //to improve, prefferd private
 	field **fields; //to improve, prefferd private
-	int g_b_width; //to improve, prefferd private
-	int g_b_height; //to improve, prefferd private
+	int g_b_columns; //to improve, prefferd private
+	int g_b_rows; //to improve, prefferd private
 
 	game_board(std::string beg_int_exp);
-	game_board(int X_width, int Y_height, int mines_number);
+	game_board(int rows, int columns, int mines_number);
 	~game_board();
 	void create_fields(); //create matrix
 	void show_fields();
