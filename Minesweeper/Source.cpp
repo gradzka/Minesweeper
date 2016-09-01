@@ -320,6 +320,8 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 				}
 				break;
 				case 0:
+					g_b_gameboard->fields[dwRefData / g_b_gameboard->g_b_columns][dwRefData % g_b_gameboard->g_b_columns].discovered = true;
+					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETSTATE, TRUE, NULL);
 					check_neigbours(dwRefData);
 					break;
 				case 1:
@@ -489,7 +491,7 @@ void check_neigbours(DWORD_PTR dwRefData)
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->g_b_columns + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X + 1)*g_b_gameboard->g_b_columns + g_b_Y - 1, g_b_X + 1, g_b_Y - 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->g_b_rows) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].flagged == false)) //bottom right diagonally
+	if ((g_b_X + 1 < g_b_gameboard->g_b_rows) && (g_b_Y + 1 < g_b_gameboard->g_b_columns) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].flagged == false)) //bottom right diagonally
 	{
 		g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->g_b_columns + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
