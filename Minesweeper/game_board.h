@@ -14,13 +14,12 @@ class game_board
 {
 private:
 	
-	
-	int mines_number;
 public:
 	std::string beg_int_exp_cus; //to improve, prefferd private
 	field **fields; //to improve, prefferd private
 	int g_b_columns; //to improve, prefferd private
 	int g_b_rows; //to improve, prefferd private
+	int mines_number;//to improve, prefferd private
 
 	game_board(std::string beg_int_exp);
 	game_board(int rows, int columns, int mines_number);
