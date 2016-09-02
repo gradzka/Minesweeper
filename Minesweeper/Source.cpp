@@ -24,17 +24,10 @@ void new_game(int rows, int columns, int mines);
 void new_game(std::string level);
 void level_of_new_game(std::string level, int rows = 0, int columns = 0, int mines_number = 0);
 int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName = "Minesweeper");
+void delete_buttons();
 
-//Source of Subclassing Example: https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
-//
-//  FUNCTION: NewSafeBtnProc(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR)
-//
-//  PURPOSE:  The new procedure that processes messages for the button control. 
-//  Every time a message is received by the new window procedure, a subclass 
-//  ID and reference data are included.
-//
 
 char b[32];
 
@@ -44,6 +37,8 @@ int gl_g_b_Y = 0;
 
 bool GAME_OVER = false;
 HWND hwnd;
+HMENU hMenu;
+HWND **hwnd_matrix;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -71,9 +66,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 1;
 	}
 
-	return create_new_game(hInstance, nCmdShow, ClassName);
+	hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(1001));
 
-	delete g_b_gameboard;
+	return create_new_game(hInstance, nCmdShow, ClassName);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -110,6 +105,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_DESTROY:
+		delete g_b_gameboard;
 		PostQuitMessage(0);
 		break;
 
@@ -152,7 +148,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1007: //High Scores
 		{
-			PostQuitMessage(0);
 			break;
 		}
 		case 1008: //Exit
@@ -162,7 +157,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1009: //About
 			{
-				PostQuitMessage(0);
+				delete_buttons();
+
+				int horizontal = 0;
+				int vertical = 0;
+				int width = 300;
+				int height = 500;
+
+				GetDesktopResolution(horizontal, vertical);
+				SetWindowPos(hwnd,
+					HWND_TOP,
+					horizontal_coordinates,
+					vertical_coordinates,
+					width, height,
+					SWP_SHOWWINDOW);
 				break;
 			}
 		}
@@ -174,7 +182,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if ((HWND)lParam == GetDlgItem(hwnd, -1))
 			{
 				level_of_new_game(g_b_gameboard->beg_int_exp_cus);
-				//InvalidateRect(hwnd, NULL, FALSE);
+				SetFocus(hwnd);
 			}
 			break;
 		}
@@ -290,14 +298,12 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			}
 
 		}
-
 		return TRUE;
 
 		//When Right Button is released
 	case WM_RBUTTONUP:
 
 		// Mouse button right-click event handler
-		//char b[32];
 		/*_itoa_s(dwRefData, b, 10);
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
 		gl_g_b_X = dwRefData / g_b_gameboard->g_b_columns;
@@ -368,13 +374,12 @@ HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance)
 }
 void load_BITMAP()
 {
-	int n;
 	std::string name = "";
 	char help_bufor[3];
 	for (int i = 0; i < 16; i++)
 	{
 		_itoa_s(i, help_bufor, 10);
-		name = "BMPs\\" + std::string(help_bufor) + ".bmp";
+		name = "BMPs\\Crash\\" + std::string(help_bufor) + ".bmp";
 		hbit_BMPs[i] = (HBITMAP)LoadImage(NULL, name.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	}
 }
@@ -487,11 +492,10 @@ void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string
 }
 void new_game(int rows, int columns, int mines)
 {
-	delete g_b_gameboard;
 	g_b_gameboard = new game_board(rows, columns, mines); //Custom setting, Game_board 10x10 and 9 mines
 	GAME_OVER = false;
 
-	//create_new_buttons((HINSTANCE)GetModuleHandle(NULL));
+	create_new_game((HINSTANCE)GetModuleHandle(NULL), SW_SHOWDEFAULT);
 
 	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
 	{
@@ -502,12 +506,10 @@ void new_game(int rows, int columns, int mines)
 }
 void new_game(std::string level)
 {
-	delete g_b_gameboard;
 	g_b_gameboard = new game_board(level); //Custom setting, Game_board 10x10 and 9 mines
 	GAME_OVER = false;
 
-	//create_new_buttons((HINSTANCE)GetModuleHandle(NULL));
-	//create_new_game((HINSTANCE)GetModuleHandle(NULL), nCmdShow);
+	create_new_game((HINSTANCE)GetModuleHandle(NULL), SW_SHOWDEFAULT);
 
 	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
 	{
@@ -549,14 +551,12 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 
 	GetDesktopResolution(horizontal, vertical);
 
-	HMENU hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(1001));
-
 	// Creating window
 	hwnd = CreateWindowEx(
 		WS_EX_WINDOWEDGE,
 		ClassName,
 		ClassName,
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+		WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
 		horizontal_coordinates,
 		vertical_coordinates,
 		width,
@@ -574,7 +574,6 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 	HWND hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
 		width / 2 - 22, 5, 26, 26, hwnd, (HMENU)-1, hInstance, 0);
 
-	//HBITMAP hbit = (HBITMAP)LoadImage(NULL, "BMPs\\smile.bmp", IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	load_BITMAP();
 	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 
@@ -582,7 +581,7 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 
 
 	//HWND matrix
-	HWND **hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
+	hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
 
 	// Get the handle of the control to be subclassed, and subclass it.
 	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
@@ -602,4 +601,17 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 		DispatchMessage(&Communique);
 	}
 	return Communique.wParam;
+}
+
+void delete_buttons()
+{
+	for (int i = 0; i < g_b_gameboard->g_b_rows; i++)
+	{
+		for (int j = 0; j < g_b_gameboard->g_b_columns; j++)
+		{
+			DestroyWindow(hwnd_matrix[i][j]);
+		}
+		delete[] hwnd_matrix[i];
+	}
+	delete hwnd_matrix;
 }

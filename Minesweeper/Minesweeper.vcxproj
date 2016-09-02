@@ -67,9 +67,6 @@
     <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="saper.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="game_board.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>

@@ -13,6 +13,7 @@ Minesweeper game for Windows
 
 ##Attributions
 http://stackoverflow.com/questions/8690619/how-to-get-screen-resolution-in-c
+https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
 
 ##License
 MIT
