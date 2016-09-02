@@ -1,22 +1,20 @@
-1000 ICON "BMPs\\Crash\\icon.ico"
-
-1001 MENU
+1000 MENU
 {
 	POPUP "&Game"
 	{
-		MENUITEM "&New\tF2", 1002
+		MENUITEM "&New\tF2", 1001
 			MENUITEM SEPARATOR
-		MENUITEM "&Beginner", 1003, CHECKED
-		MENUITEM "&Intermediate", 1004
-		MENUITEM "&Expert", 1005
-		MENUITEM "&Custom...", 1006
+		MENUITEM "&Beginner", 1002, CHECKED
+		MENUITEM "&Intermediate", 1003
+		MENUITEM "&Expert", 1004
+		MENUITEM "&Custom...", 1005
 			MENUITEM SEPARATOR
-		MENUITEM "&High Scores...", 1007
+		MENUITEM "&High Scores...", 1006
 			MENUITEM SEPARATOR
-		MENUITEM "&Exit", 1008
+		MENUITEM "&Exit", 1007
 	}
 	POPUP "&Help"
 	{
-		MENUITEM "&About", 1009
+		MENUITEM "&About", 1008
 	}
 }

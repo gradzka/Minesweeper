@@ -2,7 +2,7 @@
 #include <string>
 #include "game_board.h"
 
-#define SAPER_LOGO 1000
+
 #define horizontal_coordinates (horizontal / 2 -  width / 2)
 #define vertical_coordinates (vertical / 2 - height / 2)
 
@@ -52,12 +52,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(SAPER_LOGO));
+	wc.hIcon = 0;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)(1);
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = ClassName;
-	wc.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(SAPER_LOGO));
+	wc.hIconSm = 0;
 
 	if (!RegisterClassEx(&wc))
 	{
@@ -66,7 +66,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 1;
 	}
 
-	hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(1001));
+	hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(1000));
 
 	return create_new_game(hInstance, nCmdShow, ClassName);
 }
@@ -113,49 +113,49 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		//ACTION MENU
 		switch (LOWORD(wParam))
 		{
-		case 1002: //NEW GAME
+		case 1001: //NEW GAME
 		{
 			level_of_new_game(g_b_gameboard->beg_int_exp_cus);
 			break;
 		}
-		case 1003: //Beginner
+		case 1002: //Beginner
 		{
-			uncheck_menu(1004, 1005, 1006, "Intermediate", "Expert", "Custom");
-			CheckMenuItem(GetMenu(hwnd), 1003, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_menu(1003, 1004, 1005, "Intermediate", "Expert", "Custom");
+			CheckMenuItem(GetMenu(hwnd), 1002, MF_BYCOMMAND | MF_CHECKED);
 			level_of_new_game("Beginner");
 			break; 
 		}
-		case 1004: //Intermediate
+		case 1003: //Intermediate
 		{
-			uncheck_menu(1003, 1005, 1006, "Beginner", "Expert", "Custom");
-			CheckMenuItem(GetMenu(hwnd), 1004, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_menu(1002, 1004, 1005, "Beginner", "Expert", "Custom");
+			CheckMenuItem(GetMenu(hwnd), 1003, MF_BYCOMMAND | MF_CHECKED);
 			level_of_new_game("Intermediate");
 			break;
 		}
-		case 1005: //Expert
+		case 1004: //Expert
 		{
-			uncheck_menu(1003, 1004, 1006, "Beginner", "Intermediate", "Custom");
-			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_menu(1002, 1003, 1005, "Beginner", "Intermediate", "Custom");
+			CheckMenuItem(GetMenu(hwnd), 1004, MF_BYCOMMAND | MF_CHECKED);
 			level_of_new_game("Expert");
 			break;
 		}
-		case 1006: //Custom
+		case 1005: //Custom
 		{
-			uncheck_menu(1003, 1004, 1005, "Beginner", "Intermediate", "Expert");
-			CheckMenuItem(GetMenu(hwnd), 1006, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
+			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
 			level_of_new_game("Custom", 10,17,10); // To improve
 			break;
 		}
-		case 1007: //High Scores
+		case 1006: //High Scores
 		{
 			break;
 		}
-		case 1008: //Exit
+		case 1007: //Exit
 		{
 			PostQuitMessage(0);
 			break;
 		}
-		case 1009: //About
+		case 1008: //About
 			{
 				delete_buttons();
 
@@ -541,6 +541,8 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 {
 	MSG Communique;
 
+
+
 	//screen sizes, GetDesktopResolution will update them
 	int horizontal = 0;
 	int vertical = 0;
@@ -570,6 +572,10 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 	{
 		return 1;
 	}
+
+	HANDLE icon = LoadImage(hInstance, "BMPs\\Crash\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
 
 	HWND hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
 		width / 2 - 22, 5, 26, 26, hwnd, (HMENU)-1, hInstance, 0);
