@@ -3,29 +3,30 @@
 #include "game_board.h"
 
 
-#define horizontal_coordinates (horizontal / 2 -  width / 2)
-#define vertical_coordinates (vertical / 2 - height / 2)
+#define horizontal_coordinates (horizontal / 2 -  get_window_width() / 2)
+#define vertical_coordinates (vertical / 2 - get_window_height() / 2)
 
 HBITMAP hbit_BMPs[16];
-
 
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
+int get_window_width();
+int get_window_height();
 void GetDesktopResolution(int &horizontal, int &vertical);
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
 void load_BITMAP();
 void check_neigbours(DWORD_PTR dwRefData);
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y);
 void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string menu_level_1, std::string menu_level_2, std::string menu_level_3);
-void new_game(int rows, int columns, int mines);
-void new_game(std::string level);
-void level_of_new_game(std::string level, int rows = 0, int columns = 0, int mines_number = 0);
-int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName = "Minesweeper");
-void delete_buttons();
-void change_the_level_of_game();
+void HWND_matrix_and_subclassing();
+void delete_buttons(int old_rows, int old_buttons);
+void clear_old_window_change_its_pos_and_dim(int old_rows, int old_buttons);
+void unpressed_clear_button_normal_face();
+void play_again_or_change_level(std::string again_or_level, std::string level = "", int rows = 0, int columns = 0, int mines = 0);
+
 
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
@@ -69,7 +70,55 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(1000));
 
-	return create_new_game(hInstance, nCmdShow, ClassName);
+	MSG Communique;
+
+	//screen sizes, GetDesktopResolution will update them
+	int horizontal = 0;
+	int vertical = 0;
+
+	GetDesktopResolution(horizontal, vertical);
+
+	// Creating window
+	hwnd = CreateWindowEx(
+		WS_EX_WINDOWEDGE,
+		ClassName,
+		ClassName,
+		WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
+		horizontal_coordinates,
+		vertical_coordinates,
+		get_window_width(),
+		get_window_height(),
+		NULL,
+		hMenu,
+		hInstance,
+		NULL);
+
+	if (hwnd == NULL)
+	{
+		return 1;
+	}
+
+	HANDLE icon = LoadImage(hInstance, "BMPs\\Crash\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+
+	HWND hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
+		get_window_width() / 2 - 22, 5, 26, 26, hwnd, (HMENU)-1, hInstance, 0);
+
+	load_BITMAP();
+	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+	
+	HWND_matrix_and_subclassing();
+
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
+
+	while (GetMessage(&Communique, NULL, 0, 0))
+	{
+		TranslateMessage(&Communique);
+		DispatchMessage(&Communique);
+	}
+	return Communique.wParam;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -81,7 +130,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch ((int)wParam)
 		{
 		case VK_F2:
-			level_of_new_game(g_b_gameboard->beg_int_exp_cus);			
+			play_again_or_change_level("again");
 			break;
 		}
 	}
@@ -116,35 +165,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 		case 1001: //NEW GAME
 		{
-			level_of_new_game(g_b_gameboard->beg_int_exp_cus);
+			play_again_or_change_level("again");
 			break;
 		}
 		case 1002: //Beginner
 		{
 			uncheck_menu(1003, 1004, 1005, "Intermediate", "Expert", "Custom");
 			CheckMenuItem(GetMenu(hwnd), 1002, MF_BYCOMMAND | MF_CHECKED);
-			level_of_new_game("Beginner");
+			//new_game("Beginner");
+			play_again_or_change_level("level", "Beginner");
 			break; 
 		}
 		case 1003: //Intermediate
 		{
 			uncheck_menu(1002, 1004, 1005, "Beginner", "Expert", "Custom");
 			CheckMenuItem(GetMenu(hwnd), 1003, MF_BYCOMMAND | MF_CHECKED);
-			level_of_new_game("Intermediate");
+			//new_game("Intermediate");
+			play_again_or_change_level("level", "Intermediate");
 			break;
 		}
 		case 1004: //Expert
 		{
 			uncheck_menu(1002, 1003, 1005, "Beginner", "Intermediate", "Custom");
 			CheckMenuItem(GetMenu(hwnd), 1004, MF_BYCOMMAND | MF_CHECKED);
-			level_of_new_game("Expert");
+			//new_game("Expert");
+			play_again_or_change_level("level", "Expert");
 			break;
 		}
 		case 1005: //Custom
 		{
 			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
 			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
-			level_of_new_game("Custom", 10,17,10); // To improve
+			//new_game(10,17,10); // To improve
+			play_again_or_change_level("level", "Custom",10,17,10);
 			break;
 		}
 		case 1006: //High Scores
@@ -158,21 +211,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1008: //About
 			{
-				change_the_level_of_game();
-				/*delete_buttons();
-
-				int horizontal = 0;
-				int vertical = 0;
-				int width = 300;
-				int height = 500;
-
-				GetDesktopResolution(horizontal, vertical);
-				SetWindowPos(hwnd,
-					HWND_TOP,
-					horizontal_coordinates,
-					vertical_coordinates,
-					width, height,
-					SWP_SHOWWINDOW);*/
 				break;
 			}
 		}
@@ -183,7 +221,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			// see which button was clicked
 			if ((HWND)lParam == GetDlgItem(hwnd, -1))
 			{
-				level_of_new_game(g_b_gameboard->beg_int_exp_cus);
+				play_again_or_change_level("again");
 				SetFocus(hwnd);
 			}
 			break;
@@ -241,7 +279,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 						SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
 						SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
 
-						for (int i = 0; i < g_b_gameboard->g_b_rows; i++)
+						for (int i = 0; i < g_b_gameboard->g_b_columns; i++)
 						{
 							for (int j = 0; j < g_b_gameboard->g_b_columns; j++)
 							{
@@ -339,6 +377,18 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 	default:
 		return DefSubclassProc(hButton, message, wParam, lParam);
 	}
+}
+int get_window_width()
+{
+	int width = 0;
+	width=18 + 16 * g_b_gameboard->g_b_columns;
+	return width;
+}
+int get_window_height()
+{
+	int height = 0;
+	height = 98 + 16 * g_b_gameboard->g_b_rows;
+	return height;
 }
 // width and height in pix:
 void GetDesktopResolution(int &horizontal, int &vertical)
@@ -439,7 +489,6 @@ void check_neigbours(DWORD_PTR dwRefData)
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->g_b_columns + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X + 1)*g_b_gameboard->g_b_columns + g_b_Y + 1, g_b_X + 1, g_b_Y + 1);
 	}
-
 }
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y)
 {
@@ -492,102 +541,10 @@ void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string
 		CheckMenuItem(GetMenu(hwnd), menu_arg_3, MF_BYCOMMAND | MF_UNCHECKED);
 	}
 }
-void new_game(int rows, int columns, int mines)
+void HWND_matrix_and_subclassing()
 {
-	g_b_gameboard = new game_board(rows, columns, mines); //Custom setting, Game_board 10x10 and 9 mines
-	GAME_OVER = false;
-
-	change_the_level_of_game();
-
-	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
-	{
-		SendMessage(GetDlgItem(hwnd, i), BM_SETSTATE, FALSE, NULL);
-		SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
-	}
-	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
-}
-void new_game(std::string level)
-{
-	g_b_gameboard = new game_board(level); //Custom setting, Game_board 10x10 and 9 mines
-	GAME_OVER = false;
-
-	//create_new_game((HINSTANCE)GetModuleHandle(NULL), SW_SHOWDEFAULT);
-
-	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
-	{
-		SendMessage(GetDlgItem(hwnd, i), BM_SETSTATE, FALSE, NULL);
-		SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
-	}
-	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
-}
-void level_of_new_game(std::string level, int rows, int columns, int mines_number)
-{
-	if (level.compare("Beginner") == 0)
-	{
-		new_game("Beginner");
-	}
-	else if (level.compare("Intermediate") == 0)
-	{
-		new_game("Intermediate");
-	}
-	else if (level.compare("Expert") == 0)
-	{
-		new_game("Expert");
-	}
-	else if (level.compare("Custom") == 0)
-	{
-		new_game(rows, columns, mines_number);
-	}
-}
-int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
-{
-	MSG Communique;
-
-	//screen sizes, GetDesktopResolution will update them
-	int horizontal = 0;
-	int vertical = 0;
-
-	//window sizes
-	int width = 18 + 16 * g_b_gameboard->g_b_columns;
-	int height = 98 + 16 * g_b_gameboard->g_b_rows;
-
-	GetDesktopResolution(horizontal, vertical);
-
-	// Creating window
-	hwnd = CreateWindowEx(
-		WS_EX_WINDOWEDGE,
-		ClassName,
-		ClassName,
-		WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
-		horizontal_coordinates,
-		vertical_coordinates,
-		width,
-		height,
-		NULL,
-		hMenu,
-		hInstance,
-		NULL);
-
-	if (hwnd == NULL)
-	{
-		return 1;
-	}
-
-	HANDLE icon = LoadImage(hInstance, "BMPs\\Crash\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
-	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
-
-	HWND hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
-		width / 2 - 22, 5, 26, 26, hwnd, (HMENU)-1, hInstance, 0);
-
-	load_BITMAP();
-	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
-
-	//g_b_gameboard = new game_board(10, 10, 10); //Custom setting, Game_board 10x10 and 9 mines
-
-
 	//HWND matrix
-	hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
+	hwnd_matrix = get_hwnd_matrix(hwnd, (HINSTANCE)GetModuleHandle(NULL));
 
 	// Get the handle of the control to be subclassed, and subclass it.
 	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
@@ -597,22 +554,12 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 			DestroyWindow(hwnd);
 		}
 	}
-
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
-
-	while (GetMessage(&Communique, NULL, 0, 0))
-	{
-		TranslateMessage(&Communique);
-		DispatchMessage(&Communique);
-	}
-	return Communique.wParam;
 }
-void delete_buttons()
+void delete_buttons(int old_rows, int old_columns)
 {
-	for (int i = 0; i < g_b_gameboard->g_b_rows; i++)
+	for (int i = 0; i < old_rows; i++)
 	{
-		for (int j = 0; j < g_b_gameboard->g_b_columns; j++)
+		for (int j = 0; j < old_columns; j++)
 		{
 			DestroyWindow(hwnd_matrix[i][j]);
 		}
@@ -620,40 +567,58 @@ void delete_buttons()
 	}
 	delete []hwnd_matrix;
 }
-void change_the_level_of_game()
+void clear_old_window_change_its_pos_and_dim(int old_rows, int old_columns)
 {
-
 	int horizontal = 0;
 	int vertical = 0;
 
-	//g_b_gameboard->g_b_columns = 15;
-	//g_b_gameboard->g_b_rows = 10;
-
-	int width = 18 + 16 * g_b_gameboard->g_b_columns;
-	int height = 98 + 16 * g_b_gameboard->g_b_rows;
-
 	GetDesktopResolution(horizontal, vertical);
 
-	//delete_buttons();
+	delete_buttons(old_rows, old_columns);
 
-	/*//HWND matrix
-	hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
+	HWND_matrix_and_subclassing();
 
-	// Get the handle of the control to be subclassed, and subclass it.
-	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
-	{
-		if (!SetWindowSubclass(GetDlgItem(hwnd, i), NewSafeBtnProc, 0, i))
-		{
-			DestroyWindow(hwnd);
-		}
-	}*/
-	//
-	MoveWindow(GetDlgItem(hwnd, -1), width / 2 - 22, 5, 26, 26, TRUE);
+	MoveWindow(GetDlgItem(hwnd, -1), get_window_width() / 2 - 22, 5, 26, 26, TRUE);
 
 	SetWindowPos(hwnd,
 		HWND_TOP,
 		horizontal_coordinates,
 		vertical_coordinates,
-		width, height,
+		get_window_width(), get_window_height(),
 		SWP_SHOWWINDOW);
+}
+void unpressed_clear_button_normal_face()
+{
+	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
+	{
+		SendMessage(GetDlgItem(hwnd, i), BM_SETSTATE, FALSE, NULL);
+		SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
+	}
+	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+}
+void play_again_or_change_level(std::string again_or_level,std::string level, int rows, int columns, int mines)
+{
+	if (again_or_level.compare("again")==0)
+	{ 
+		unpressed_clear_button_normal_face();
+		g_b_gameboard = g_b_gameboard->beg_int_exp_cus.compare("Custom") == 0 ?
+			new game_board(g_b_gameboard->g_b_rows, g_b_gameboard->g_b_columns, g_b_gameboard->mines_number) :
+			new game_board(g_b_gameboard->beg_int_exp_cus);
+	}
+	else if (again_or_level.compare("level")==0)
+	{
+		int old_rows = 0;
+		int old_columns = 0;
+		old_rows = g_b_gameboard->g_b_rows;
+		old_columns = g_b_gameboard->g_b_columns;
+
+		g_b_gameboard = level.compare("Custom") == 0 ?
+			new game_board(rows, columns, mines) :
+			new game_board(level);
+
+		clear_old_window_change_its_pos_and_dim(old_rows, old_columns);
+
+		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+	}
+	GAME_OVER = false;
 }

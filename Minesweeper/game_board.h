@@ -13,7 +13,7 @@ struct field
 class game_board
 {
 private:
-	
+
 public:
 	std::string beg_int_exp_cus; //to improve, prefferd private
 	field **fields; //to improve, prefferd private
@@ -36,7 +36,6 @@ int main()
 //game_board *g_b = new game_board("Beginner");
 game_board *g_b = new game_board(10,10,82);
 g_b->show_fields();
-
 delete g_b;
 system("PAUSE");
 return 0;
