@@ -7,20 +7,20 @@ game_board::game_board(std::string beg_int_exp_cus)
 
 	if (this->beg_int_exp_cus.compare("Beginner") == 0)
 	{
-		g_b_columns = 9;
-		g_b_rows = 9;
+		columns = 9;
+		rows = 9;
 		mines_number = 10;
 	}
 	if (this->beg_int_exp_cus.compare("Intermediate") == 0)
 	{
-		g_b_columns = 16;
-		g_b_rows = 16;
+		columns = 16;
+		rows = 16;
 		mines_number = 40;
 	}
 	if (this->beg_int_exp_cus.compare("Expert") == 0)
 	{
-		g_b_columns = 30;
-		g_b_rows = 16;
+		columns = 30;
+		rows = 16;
 		mines_number = 99;
 	}
 
@@ -30,7 +30,7 @@ game_board::game_board(std::string beg_int_exp_cus)
 	this->rand_mines();
 	this->neighbours_mines();
 }
-game_board::game_board(int rows, int columns, int mines_number)
+game_board::game_board(int a_rows, int a_columns, int a_mines_number)
 {
 	/*Player should type board size between 9x9 and 30x24
 	and mines number between 10 and 667.
@@ -40,24 +40,24 @@ game_board::game_board(int rows, int columns, int mines_number)
 	fields = NULL;
 	beg_int_exp_cus = "Custom";
 
-	if (columns < 9) columns = 9;
-	else if (columns > 30) columns = 30;
+	if (a_columns < 9) a_columns = 9;
+	else if (a_columns > 30) a_columns = 30;
 
-	if (rows < 9) rows = 9;
-	else if (rows > 24) rows = 24;
+	if (a_rows < 9) a_rows = 9;
+	else if (a_rows > 24) a_rows = 24;
 
-	g_b_columns = columns;
-	g_b_rows = rows;
+	columns = a_columns;
+	rows = a_rows;
 
 	this->create_fields();
 
 	int max_mines_number = 0;
-	max_mines_number = (g_b_columns - 1)*(g_b_rows - 1);
+	max_mines_number = (columns - 1)*(rows - 1);
 
-	if (mines_number < 10) mines_number = 10;
-	else if (mines_number>max_mines_number) mines_number = max_mines_number;
+	if (a_mines_number < 10) a_mines_number = 10;
+	else if (a_mines_number>max_mines_number) a_mines_number = max_mines_number;
 
-	this->mines_number = mines_number;
+	mines_number = a_mines_number;
 
 	srand(time(NULL));
 	this->rand_mines();
@@ -65,7 +65,7 @@ game_board::game_board(int rows, int columns, int mines_number)
 }
 game_board::~game_board()
 {
-	for (int i = 0; i < g_b_rows; i++)
+	for (int i = 0; i < rows; i++)
 	{
 		delete[]fields[i];
 	}
@@ -73,11 +73,11 @@ game_board::~game_board()
 }
 void game_board::create_fields()
 {
-	fields = new field*[g_b_rows];
-	for (int i = 0; i < g_b_rows; i++)
+	fields = new field*[rows];
+	for (int i = 0; i < rows; i++)
 	{
-		fields[i] = new field[g_b_columns];
-		for (int j = 0; j < g_b_columns; j++)
+		fields[i] = new field[columns];
+		for (int j = 0; j < columns; j++)
 		{
 			fields[i][j].value = 0;
 			fields[i][j].flagged = false;
@@ -87,9 +87,9 @@ void game_board::create_fields()
 }
 void game_board::show_fields()
 {
-	for (int i = 0; i < g_b_rows; i++)
+	for (int i = 0; i < rows; i++)
 	{
-		for (int j = 0; j < g_b_columns; j++)
+		for (int j = 0; j < columns; j++)
 		{
 			std::cout << fields[i][j].value << "\t";
 		}
@@ -107,8 +107,8 @@ void game_board::rand_mines()
 	{
 		do
 		{
-			X = rand() % g_b_rows;
-			Y = rand() % g_b_columns;
+			X = rand() % rows;
+			Y = rand() % columns;
 			/*sprintf_s(bufor, "(%i, %i)", X, Y);
 			std::cout << bufor << std::endl;*/
 		} while (fields[X][Y].value == -1);
@@ -118,9 +118,9 @@ void game_board::rand_mines()
 }
 void game_board::neighbours_mines()
 {
-	for (int i = 0; i < g_b_rows; i++)
+	for (int i = 0; i < rows; i++)
 	{
-		for (int j = 0; j < g_b_columns; j++)
+		for (int j = 0; j < columns; j++)
 		{
 			if (fields[i][j].value == -1)
 			{
@@ -128,11 +128,11 @@ void game_board::neighbours_mines()
 				{
 					fields[i - 1][j].value++; //up
 				}
-				if ((j + 1 < g_b_columns) && (fields[i][j + 1].value != -1))
+				if ((j + 1 < columns) && (fields[i][j + 1].value != -1))
 				{
 					fields[i][j + 1].value++; //right
 				}
-				if ((i + 1 < g_b_rows) && (fields[i + 1][j].value != -1))
+				if ((i + 1 < rows) && (fields[i + 1][j].value != -1))
 				{
 					fields[i + 1][j].value++; //down
 				}
@@ -144,15 +144,15 @@ void game_board::neighbours_mines()
 				{
 					fields[i - 1][j - 1].value++;
 				}
-				if ((i - 1 >= 0) && (j + 1 < g_b_columns) && (fields[i - 1][j + 1].value != -1)) //upper right diagonally
+				if ((i - 1 >= 0) && (j + 1 < columns) && (fields[i - 1][j + 1].value != -1)) //upper right diagonally
 				{
 					fields[i - 1][j + 1].value++;
 				}
-				if ((i + 1 < g_b_rows) && (j - 1 >= 0) && (fields[i + 1][j - 1].value != -1)) //bottom left diagonally
+				if ((i + 1 < rows) && (j - 1 >= 0) && (fields[i + 1][j - 1].value != -1)) //bottom left diagonally
 				{
 					fields[i + 1][j - 1].value++;
 				}
-				if ((i + 1 < g_b_rows) && (j + 1 < g_b_columns) && (fields[i + 1][j + 1].value != -1)) //bottom right diagonally
+				if ((i + 1 < rows) && (j + 1 < columns) && (fields[i + 1][j + 1].value != -1)) //bottom right diagonally
 				{
 					fields[i + 1][j + 1].value++;
 				}

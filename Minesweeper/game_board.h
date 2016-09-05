@@ -13,17 +13,21 @@ struct field
 class game_board
 {
 private:
-
+	int rows;
+	int columns;
+	int mines_number;
+	std::string beg_int_exp_cus;
 public:
-	std::string beg_int_exp_cus; //to improve, prefferd private
 	field **fields; //to improve, prefferd private
-	int g_b_columns; //to improve, prefferd private
-	int g_b_rows; //to improve, prefferd private
-	int mines_number;//to improve, prefferd private
-
+	
 	game_board(std::string beg_int_exp);
 	game_board(int rows, int columns, int mines_number);
 	~game_board();
+
+	int get_columns(){ return columns; }
+	int get_rows(){ return rows; }
+	int get_mines_number(){ return mines_number; }
+	std::string get_beg_int_exp_cus(){ return beg_int_exp_cus; }
 	void create_fields(); //create matrix
 	void show_fields();
 	void rand_mines(); //fills matrix with randomly placed mines
