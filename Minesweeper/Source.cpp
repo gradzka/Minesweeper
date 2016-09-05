@@ -27,7 +27,6 @@ void clear_old_window_change_its_pos_and_dim(int old_rows, int old_buttons);
 void unpressed_clear_button_normal_face();
 void play_again_or_change_level(std::string again_or_level, std::string level = "", int rows = 0, int columns = 0, int mines = 0);
 
-
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
 
@@ -172,7 +171,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			uncheck_menu(1003, 1004, 1005, "Intermediate", "Expert", "Custom");
 			CheckMenuItem(GetMenu(hwnd), 1002, MF_BYCOMMAND | MF_CHECKED);
-			//new_game("Beginner");
 			play_again_or_change_level("level", "Beginner");
 			break; 
 		}
@@ -180,7 +178,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			uncheck_menu(1002, 1004, 1005, "Beginner", "Expert", "Custom");
 			CheckMenuItem(GetMenu(hwnd), 1003, MF_BYCOMMAND | MF_CHECKED);
-			//new_game("Intermediate");
 			play_again_or_change_level("level", "Intermediate");
 			break;
 		}
@@ -188,7 +185,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			uncheck_menu(1002, 1003, 1005, "Beginner", "Intermediate", "Custom");
 			CheckMenuItem(GetMenu(hwnd), 1004, MF_BYCOMMAND | MF_CHECKED);
-			//new_game("Expert");
 			play_again_or_change_level("level", "Expert");
 			break;
 		}
@@ -196,7 +192,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
 			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
-			//new_game(10,17,10); // To improve
 			play_again_or_change_level("level", "Custom",10,17,10);
 			break;
 		}
@@ -257,7 +252,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
 			gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
 
-			if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == false)
+			if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == false)
 				SendMessage(hButton, BM_SETSTATE, TRUE, NULL);
 
 			/*_itoa_s(dwRefData, b, 10);
@@ -267,11 +262,10 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			MessageBox(hButton, b, "Y", MB_OK);*/
 			
 
-			if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].discovered == false && g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == false) //if button wasn't discovered
+			if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).discovered == false && g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == false) //if button wasn't discovered
 			{
-				g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].discovered = true;
-				//dwRefData == 1 &&
-				switch (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].value)
+				g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).discovered = true;
+				switch (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).value)
 				{
 				case -1:
 				{
@@ -283,14 +277,14 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 						{
 							for (int j = 0; j < g_b_gameboard->get_columns(); j++)
 							{
-								if (g_b_gameboard->fields[i][j].value == -1 && g_b_gameboard->fields[i][j].discovered == false)
+								if (g_b_gameboard->get_fields(i, j).value == -1 && g_b_gameboard->get_fields(i, j).discovered == false)
 								{
-									if (g_b_gameboard->fields[i][j].flagged == false)
+									if (g_b_gameboard->get_fields(i,j).flagged == false)
 									{
 										SendMessage(GetDlgItem(hwnd, g_b_gameboard->get_columns() * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
 									}
 								}
-								else if (g_b_gameboard->fields[i][j].value != -1 && g_b_gameboard->fields[i][j].flagged == true)
+								else if (g_b_gameboard->get_fields(i, j).value != -1 && g_b_gameboard->get_fields(i, j).flagged == true)
 								{
 									SendMessage(GetDlgItem(hwnd, g_b_gameboard->get_columns() * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
 								}
@@ -303,7 +297,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 				}
 				break;
 				case 0:
-					g_b_gameboard->fields[dwRefData / g_b_gameboard->get_columns()][dwRefData % g_b_gameboard->get_columns()].discovered = true;
+					g_b_gameboard->get_fields(dwRefData / g_b_gameboard->get_columns(),dwRefData % g_b_gameboard->get_columns()).discovered = true;
 					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETSTATE, TRUE, NULL);
 					check_neigbours(dwRefData);
 					break;
@@ -342,22 +336,21 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 		//When Right Button is released
 	case WM_RBUTTONUP:
-
 		// Mouse button right-click event handler
 		/*_itoa_s(dwRefData, b, 10);
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
 		gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
 		gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
 
-		if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == false && g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].discovered == false)
+		if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == false && g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).discovered == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
-			g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged = true;
+			g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged = true;
 		}
-		else if (g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged == true && GAME_OVER == false)
+		else if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == true && GAME_OVER == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, NULL);
-			g_b_gameboard->fields[gl_g_b_X][gl_g_b_Y].flagged = false;
+			g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged = false;
 		}
 		return TRUE;
 
@@ -439,60 +432,60 @@ void check_neigbours(DWORD_PTR dwRefData)
 {
 	int g_b_X = dwRefData / g_b_gameboard->get_columns();
 	int g_b_Y = dwRefData % g_b_gameboard->get_columns();
-	//Do ifów
-	if ((g_b_X - 1 >= 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y].discovered == false) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y].flagged == false))//up
+
+	if ((g_b_X - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X - 1,g_b_Y).discovered == false) && (g_b_gameboard->get_fields(g_b_X - 1,g_b_Y).flagged == false))//up
 	{
-		g_b_gameboard->fields[g_b_X - 1][g_b_Y].discovered = true;
+		g_b_gameboard->get_fields(g_b_X - 1,g_b_Y).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y, g_b_X - 1, g_b_Y);
 
 	}
-	if ((g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->fields[g_b_X][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X][g_b_Y + 1].flagged == false))//right
+	if ((g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->get_fields(g_b_X,g_b_Y + 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X,g_b_Y + 1).flagged == false))//right
 	{
-		g_b_gameboard->fields[g_b_X][g_b_Y + 1].discovered = true;
+		g_b_gameboard->get_fields(g_b_X,g_b_Y + 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X)*g_b_gameboard->get_columns() + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X)*g_b_gameboard->get_columns() + g_b_Y + 1, g_b_X, g_b_Y + 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y].flagged == false))//down
+	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y).discovered == false) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y).flagged == false))//down
 	{
-		g_b_gameboard->fields[g_b_X + 1][g_b_Y].discovered = true;
+		g_b_gameboard->get_fields(g_b_X + 1,g_b_Y).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y, g_b_X + 1, g_b_Y);
 	}
-	if ((g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X][g_b_Y - 1].discovered == false) && (g_b_gameboard->fields[g_b_X][g_b_Y - 1].flagged == false))//left
+	if ((g_b_Y - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X, g_b_Y - 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X, g_b_Y - 1).flagged == false))//left
 	{
-		g_b_gameboard->fields[g_b_X][g_b_Y - 1].discovered = true;
+		g_b_gameboard->get_fields(g_b_X, g_b_Y - 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X)*g_b_gameboard->get_columns() + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X)*g_b_gameboard->get_columns() + g_b_Y - 1, g_b_X, g_b_Y - 1);
 	}
-	if ((g_b_X - 1 >= 0) && (g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].discovered == false) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].flagged == false)) //upper left diagonally
+	if ((g_b_X - 1 >= 0) && (g_b_Y - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X - 1, g_b_Y - 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X - 1, g_b_Y - 1).flagged == false)) //upper left diagonally
 	{
-		g_b_gameboard->fields[g_b_X - 1][g_b_Y - 1].discovered = true;
+		g_b_gameboard->get_fields(g_b_X - 1, g_b_Y - 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y - 1, g_b_X - 1, g_b_Y - 1);
 	}
-	if ((g_b_X - 1 >= 0) && (g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].flagged == false)) //upper right diagonally
+	if ((g_b_X - 1 >= 0) && (g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->get_fields(g_b_X - 1, g_b_Y + 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X - 1, g_b_Y + 1).flagged == false)) //upper right diagonally
 	{
-		g_b_gameboard->fields[g_b_X - 1][g_b_Y + 1].discovered = true;
+		g_b_gameboard->get_fields(g_b_X - 1, g_b_Y + 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y + 1, g_b_X - 1, g_b_Y + 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_Y - 1 >= 0) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].flagged == false)) //bottom left diagonally
+	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_Y - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X + 1,g_b_Y - 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X + 1,g_b_Y - 1).flagged == false)) //bottom left diagonally
 	{
-		g_b_gameboard->fields[g_b_X + 1][g_b_Y - 1].discovered = true;
+		g_b_gameboard->get_fields(g_b_X + 1, g_b_Y - 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y - 1, g_b_X + 1, g_b_Y - 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered == false) && (g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].flagged == false)) //bottom right diagonally
+	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y + 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y + 1).flagged == false)) //bottom right diagonally
 	{
-		g_b_gameboard->fields[g_b_X + 1][g_b_Y + 1].discovered = true;
+		g_b_gameboard->get_fields(g_b_X + 1, g_b_Y + 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y + 1, g_b_X + 1, g_b_Y + 1);
 	}
 }
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y)
 {
-	switch (g_b_gameboard->fields[g_b_X][g_b_Y].value)
+	switch (g_b_gameboard->get_fields(g_b_X,g_b_Y).value)
 	{
 	case 0:
 		check_neigbours(dwRefData);
