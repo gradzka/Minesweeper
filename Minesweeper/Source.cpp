@@ -25,6 +25,7 @@ void new_game(std::string level);
 void level_of_new_game(std::string level, int rows = 0, int columns = 0, int mines_number = 0);
 int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName = "Minesweeper");
 void delete_buttons();
+void change_the_level_of_game();
 
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
@@ -157,7 +158,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1008: //About
 			{
-				delete_buttons();
+				change_the_level_of_game();
+				/*delete_buttons();
 
 				int horizontal = 0;
 				int vertical = 0;
@@ -170,7 +172,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					horizontal_coordinates,
 					vertical_coordinates,
 					width, height,
-					SWP_SHOWWINDOW);
+					SWP_SHOWWINDOW);*/
 				break;
 			}
 		}
@@ -495,7 +497,7 @@ void new_game(int rows, int columns, int mines)
 	g_b_gameboard = new game_board(rows, columns, mines); //Custom setting, Game_board 10x10 and 9 mines
 	GAME_OVER = false;
 
-	create_new_game((HINSTANCE)GetModuleHandle(NULL), SW_SHOWDEFAULT);
+	change_the_level_of_game();
 
 	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
 	{
@@ -509,7 +511,7 @@ void new_game(std::string level)
 	g_b_gameboard = new game_board(level); //Custom setting, Game_board 10x10 and 9 mines
 	GAME_OVER = false;
 
-	create_new_game((HINSTANCE)GetModuleHandle(NULL), SW_SHOWDEFAULT);
+	//create_new_game((HINSTANCE)GetModuleHandle(NULL), SW_SHOWDEFAULT);
 
 	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
 	{
@@ -540,8 +542,6 @@ void level_of_new_game(std::string level, int rows, int columns, int mines_numbe
 int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 {
 	MSG Communique;
-
-
 
 	//screen sizes, GetDesktopResolution will update them
 	int horizontal = 0;
@@ -608,7 +608,6 @@ int create_new_game(HINSTANCE hInstance, int nCmdShow, LPSTR ClassName)
 	}
 	return Communique.wParam;
 }
-
 void delete_buttons()
 {
 	for (int i = 0; i < g_b_gameboard->g_b_rows; i++)
@@ -619,5 +618,42 @@ void delete_buttons()
 		}
 		delete[] hwnd_matrix[i];
 	}
-	delete hwnd_matrix;
+	delete []hwnd_matrix;
+}
+void change_the_level_of_game()
+{
+
+	int horizontal = 0;
+	int vertical = 0;
+
+	//g_b_gameboard->g_b_columns = 15;
+	//g_b_gameboard->g_b_rows = 10;
+
+	int width = 18 + 16 * g_b_gameboard->g_b_columns;
+	int height = 98 + 16 * g_b_gameboard->g_b_rows;
+
+	GetDesktopResolution(horizontal, vertical);
+
+	//delete_buttons();
+
+	/*//HWND matrix
+	hwnd_matrix = get_hwnd_matrix(hwnd, hInstance);
+
+	// Get the handle of the control to be subclassed, and subclass it.
+	for (int i = 0; i < g_b_gameboard->g_b_rows*g_b_gameboard->g_b_columns; i++)
+	{
+		if (!SetWindowSubclass(GetDlgItem(hwnd, i), NewSafeBtnProc, 0, i))
+		{
+			DestroyWindow(hwnd);
+		}
+	}*/
+	//
+	MoveWindow(GetDlgItem(hwnd, -1), width / 2 - 22, 5, 26, 26, TRUE);
+
+	SetWindowPos(hwnd,
+		HWND_TOP,
+		horizontal_coordinates,
+		vertical_coordinates,
+		width, height,
+		SWP_SHOWWINDOW);
 }
