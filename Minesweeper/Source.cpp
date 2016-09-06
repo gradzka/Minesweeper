@@ -624,6 +624,11 @@ void play_again_or_change_level(std::string again_or_level,std::string level, in
 
 		clear_old_window_change_its_pos_and_dim(old_rows, old_columns);
 
+		for (int i = 0; i < g_b_gameboard->get_rows()*g_b_gameboard->get_columns(); i++)
+		{
+			SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]);
+		}
+
 		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 	}
 	END_OF_GAME = false;
