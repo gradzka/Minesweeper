@@ -21,6 +21,8 @@ You can use Microsoft Visual Studio to open the project and compiled it.
 ##Attributions
 - http://stackoverflow.com/questions/8690619/how-to-get-screen-resolution-in-c
 - https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
+- http://cpp0x.pl/kursy/Kurs-WinAPI-C++/167
+- http://www.functionx.com/win32/Lesson04.htm
 
 ##License
 MIT

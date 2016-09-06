@@ -1,16 +1,26 @@
 #include <windows.h>
 #include <string>
 #include "game_board.h"
-
+#include "Resource.h"
+#include <fstream>
 
 #define horizontal_coordinates (horizontal / 2 -  get_window_width() / 2)
 #define vertical_coordinates (vertical / 2 - get_window_height() / 2)
+
+struct score
+{
+	std::string name;
+	int time;
+};
+
+score HighScores[9];
 
 HBITMAP hbit_BMPs[18];
 
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
 int get_window_width();
@@ -27,6 +37,8 @@ void clear_old_window_change_its_pos_and_dim(int old_rows, int old_buttons);
 void unpressed_clear_button_normal_face();
 void play_again_or_change_level(std::string again_or_level, std::string level = "", int rows = 0, int columns = 0, int mines = 0);
 void check_if_win();
+void load_HighScores();
+void check_and_save_HighScores(int your_time, std::string level);
 
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
@@ -41,10 +53,11 @@ bool END_OF_GAME = false;
 HWND hwnd;
 HMENU hMenu;
 HWND **hwnd_matrix;
+LPSTR ClassName = "Minesweeper";
+HINSTANCE hInstance;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	LPSTR ClassName = "Minesweeper";
 	g_b_gameboard = new game_board("Beginner");
 
 	WNDCLASSEX wc;
@@ -110,6 +123,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	
 	HWND_matrix_and_subclassing();
 	unpressed_clear_button_normal_face();
+
+	load_HighScores();
 
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
@@ -199,6 +214,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1006: //High Scores
 		{
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
+				hwnd, reinterpret_cast<DLGPROC>(DlgProc));
 			break;
 		}
 		case 1007: //Exit
@@ -230,6 +247,57 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 
 	return 0;
+}
+LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	int ID_CTRL = 1016;
+	int horizontal = 0;
+	int vertical = 0;
+
+	switch (Msg)
+	{
+	case WM_INITDIALOG:
+
+		GetDesktopResolution(horizontal, vertical);
+		SetWindowPos(hWndDlg,
+			HWND_TOP,
+			(horizontal / 2 - 280),
+			(vertical / 2 - 170 / 2), 560, 170,
+			SWP_SHOWWINDOW);
+
+		for (int i = 0; i < 9; i++)
+		{
+			SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
+			ID_CTRL += 1;
+			_itoa_s(HighScores[i].time, b, 10);
+			SetDlgItemText(hWndDlg, ID_CTRL, b);
+			ID_CTRL += 1;
+		}
+
+		return TRUE;
+
+	case WM_COMMAND:
+	{
+		// reakcja na przyciski
+		switch (LOWORD(wParam))
+		{
+		case ID_OK:
+		{
+			EndDialog(hWndDlg, ID_OK);
+			break;
+		}
+		case ID_RESET:
+		{	SetWindowText(hWndDlg, "Your Caption Text");
+		break;
+		}
+		}
+	}
+	break;
+
+	default: return FALSE;
+	}
+
+	return FALSE;
 }
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
@@ -657,5 +725,110 @@ void check_if_win()
 		}
 	}
 	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[15]);
+	check_and_save_HighScores(100, g_b_gameboard->get_beg_int_exp_cus());
 	return;
+}
+void load_HighScores()
+{
+	std::fstream file;
+	file.open("HighScores.txt", std::ios::in);
+	if (!file.is_open())
+	{
+
+		file.open("HighScores.txt", std::ios::out);
+		for (int i = 0; i < 9; i++)
+		{
+			if (i == 0)
+			{
+				file << "Beginner\n";
+			}
+			if (i == 3)
+			{
+				file << "\nIntermediate\n";
+			}
+			if (i == 6)
+			{
+				file << "\nExpert\n";
+			}
+			file << "Anonymous 999\n";
+			HighScores[i].name = "Anonymous";
+			HighScores[i].time = 999;
+		}
+		file.close();
+	}
+	else
+	{
+		for (int i = 0; i < 9; i++)
+		{
+			if (i % 3 == 0)
+			{
+				file >> HighScores[i].name;
+			}
+			file >> HighScores[i].name;
+			file >> HighScores[i].time;
+		}
+		file.close();
+	}
+}
+void check_and_save_HighScores(int your_time, std::string level)
+{
+	int index;
+	index = 0;
+	if (level.compare("Beginner") == 0)
+	{
+		index = 0;
+	}
+	else if (level.compare("Intermediate") == 0)
+	{
+		index = 3;
+	}
+	else if (level.compare("Expert") == 0)
+	{
+		index = 6;
+	}
+
+	if (your_time < HighScores[index].time)
+	{
+		HighScores[index + 2].name = HighScores[index + 1].name;
+		HighScores[index + 2].time = HighScores[index + 1].time;
+		HighScores[index + 1].name = HighScores[index].name;
+		HighScores[index + 1].time = HighScores[index].time;
+		HighScores[index].name = "Player";
+		HighScores[index].time = your_time;
+	}
+	else if (your_time < HighScores[index + 1].time)
+	{
+		HighScores[index + 2].name = HighScores[index + 1].name;
+		HighScores[index + 2].time = HighScores[index + 1].time;
+		HighScores[index + 1].name = "Player";
+		HighScores[index + 1].time = your_time;
+	}
+	else if (your_time < HighScores[index + 2].time)
+	{
+		HighScores[index + 2].name = "Player";
+		HighScores[index + 2].time = your_time;
+	}
+
+	std::fstream file;
+	file.open("HighScores.txt", std::ios::out | std::ios::trunc);
+	for (int i = 0; i < 9; i++)
+	{
+		if (i == 0)
+		{
+			file << "Beginner\n";
+		}
+		if (i == 3)
+		{
+			file << "\nIntermediate\n";
+		}
+		if (i == 6)
+		{
+			file << "\nExpert\n";
+		}
+		file << HighScores[i].name;
+		file << " ";
+		file << HighScores[i].time;
+		file << "\n";
+	}
+	file.close();
 }
