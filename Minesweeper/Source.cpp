@@ -21,6 +21,7 @@ HBITMAP hbit_BMPs[18];
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
 int get_window_width();
@@ -120,7 +121,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	load_BITMAP();
 	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
-	
+
 	HWND_matrix_and_subclassing();
 	unpressed_clear_button_normal_face();
 
@@ -189,7 +190,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			uncheck_menu(1003, 1004, 1005, "Intermediate", "Expert", "Custom");
 			CheckMenuItem(GetMenu(hwnd), 1002, MF_BYCOMMAND | MF_CHECKED);
 			play_again_or_change_level("level", "Beginner");
-			break; 
+			break;
 		}
 		case 1003: //Intermediate
 		{
@@ -207,6 +208,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1005: //Custom
 		{
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_CUSTOM),
+				hwnd, reinterpret_cast<DLGPROC>(CustomProc));
 			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
 			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
 			play_again_or_change_level("level", "Custom",10,17,10);
@@ -224,11 +227,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case 1008: //About
-			{
-				DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_ABOUT),
-					hwnd, reinterpret_cast<DLGPROC>(DlgProc));
-				break;
-			}
+		{
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_ABOUT),
+				hwnd, reinterpret_cast<DLGPROC>(DlgProc));
+			break;
+		}
 		}
 
 		switch (HIWORD(wParam))
@@ -259,23 +262,22 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
+		GetDesktopResolution(horizontal, vertical);
+		SetWindowPos(hWndDlg,
+			HWND_TOP,
+			(horizontal / 2 - 280),
+			(vertical / 2 - 170 / 2), 560, 170,
+			SWP_SHOWWINDOW);
 
-			GetDesktopResolution(horizontal, vertical);
-			SetWindowPos(hWndDlg,
-				HWND_TOP,
-				(horizontal / 2 - 280),
-				(vertical / 2 - 170 / 2), 560, 170,
-				SWP_SHOWWINDOW);
-
-			for (int i = 0; i < 9; i++)
-			{
-				SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
-				ID_CTRL += 1;
-				_itoa_s(HighScores[i].time, b, 10);
-				SetDlgItemText(hWndDlg, ID_CTRL, b);
-				ID_CTRL += 1;
+		for (int i = 0; i < 9; i++)
+		{
+			SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
+			ID_CTRL += 1;
+			_itoa_s(HighScores[i].time, b, 10);
+			SetDlgItemText(hWndDlg, ID_CTRL, b);
+			ID_CTRL += 1;
 		}
-		
+
 		return TRUE;
 
 	case WM_COMMAND:
@@ -285,24 +287,55 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 		{
 		case ID_OK:
 		{
-			EndDialog(hWndDlg, ID_OK);
+			EndDialog(hWndDlg, NULL);
 			break;
 		}
 		case ID_RESET:
-		{	
-			SetWindowText(hWndDlg, "Your Caption Text");
-			break;
-		}
-		case IDD_DLG_ABOUT:
 		{
-			EndDialog(hWndDlg, IDD_DLG_ABOUT);
+			SetWindowText(hWndDlg, "Your Caption Text");
 			break;
 		}
 		}
 	}
 	case WM_DESTROY:
 	{
-		EndDialog(hWndDlg, IDD_DLG_ABOUT|IDD_DLG_HIGHSCORES);
+		EndDialog(hWndDlg, NULL); //NULL - value to return
+		break;
+	}
+	break;
+
+	default: return FALSE;
+	}
+
+	return FALSE;
+}
+LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (Msg)
+	{
+	case WM_INITDIALOG:
+		return TRUE;
+
+	case WM_COMMAND:
+	{
+		// reakcja na przyciski
+		switch (LOWORD(wParam))
+		{
+		case ID_OK:
+		{
+			EndDialog(hWndDlg, NULL);
+			break;
+		}
+		case ID_CANCEL:
+		{
+			EndDialog(hWndDlg, NULL);
+			break;
+		}
+		}
+	}
+	case WM_DESTROY:
+	{
+		EndDialog(hWndDlg, NULL); //NULL - value to return
 		break;
 	}
 	break;
@@ -335,7 +368,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
 			gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
 
-			if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == false)
+			if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false)
 				SendMessage(hButton, BM_SETSTATE, TRUE, NULL);
 
 			/*_itoa_s(dwRefData, b, 10);
@@ -343,12 +376,12 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			/*
 			_itoa_s(gl_g_b_Y, b, 10);
 			MessageBox(hButton, b, "Y", MB_OK);*/
-			
 
-			if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).discovered == false && g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == false) //if button wasn't discovered
+
+			if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered == false && g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false) //if button wasn't discovered
 			{
-				g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).discovered = true;
-				switch (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).value)
+				g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered = true;
+				switch (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).value)
 				{
 				case -1:
 				{
@@ -362,7 +395,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 							{
 								if (g_b_gameboard->get_fields(i, j).value == -1 && g_b_gameboard->get_fields(i, j).discovered == false)
 								{
-									if (g_b_gameboard->get_fields(i,j).flagged == false)
+									if (g_b_gameboard->get_fields(i, j).flagged == false)
 									{
 										SendMessage(GetDlgItem(hwnd, g_b_gameboard->get_columns() * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
 									}
@@ -380,7 +413,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 				}
 				break;
 				case 0:
-					g_b_gameboard->get_fields(dwRefData / g_b_gameboard->get_columns(),dwRefData % g_b_gameboard->get_columns()).discovered = true;
+					g_b_gameboard->get_fields(dwRefData / g_b_gameboard->get_columns(), dwRefData % g_b_gameboard->get_columns()).discovered = true;
 					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETSTATE, TRUE, NULL);
 					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
 					check_neighbours(dwRefData);
@@ -435,15 +468,15 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
 		gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
 
-		if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == false && g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).discovered == false)
+		if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false && g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
-			g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged = true;
+			g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged = true;
 		}
-		else if (g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged == true && END_OF_GAME == false)
+		else if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == true && END_OF_GAME == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]);
-			g_b_gameboard->get_fields(gl_g_b_X,gl_g_b_Y).flagged = false;
+			g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged = false;
 		}
 		return TRUE;
 
@@ -467,7 +500,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 int get_window_width()
 {
 	int width = 0;
-	width=18 + 16 * g_b_gameboard->get_columns();
+	width = 18 + 16 * g_b_gameboard->get_columns();
 	return width;
 }
 int get_window_height()
@@ -526,22 +559,22 @@ void check_neighbours(DWORD_PTR dwRefData)
 	int g_b_X = dwRefData / g_b_gameboard->get_columns();
 	int g_b_Y = dwRefData % g_b_gameboard->get_columns();
 
-	if ((g_b_X - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X - 1,g_b_Y).discovered == false) && (g_b_gameboard->get_fields(g_b_X - 1,g_b_Y).flagged == false))//up
+	if ((g_b_X - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X - 1, g_b_Y).discovered == false) && (g_b_gameboard->get_fields(g_b_X - 1, g_b_Y).flagged == false))//up
 	{
-		g_b_gameboard->get_fields(g_b_X - 1,g_b_Y).discovered = true;
+		g_b_gameboard->get_fields(g_b_X - 1, g_b_Y).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y, g_b_X - 1, g_b_Y);
 
 	}
-	if ((g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->get_fields(g_b_X,g_b_Y + 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X,g_b_Y + 1).flagged == false))//right
+	if ((g_b_Y + 1 < g_b_gameboard->get_columns()) && (g_b_gameboard->get_fields(g_b_X, g_b_Y + 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X, g_b_Y + 1).flagged == false))//right
 	{
-		g_b_gameboard->get_fields(g_b_X,g_b_Y + 1).discovered = true;
+		g_b_gameboard->get_fields(g_b_X, g_b_Y + 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X)*g_b_gameboard->get_columns() + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X)*g_b_gameboard->get_columns() + g_b_Y + 1, g_b_X, g_b_Y + 1);
 	}
 	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y).discovered == false) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y).flagged == false))//down
 	{
-		g_b_gameboard->get_fields(g_b_X + 1,g_b_Y).discovered = true;
+		g_b_gameboard->get_fields(g_b_X + 1, g_b_Y).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y, g_b_X + 1, g_b_Y);
 	}
@@ -563,7 +596,7 @@ void check_neighbours(DWORD_PTR dwRefData)
 		SendMessage(GetDlgItem(hwnd, (g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y + 1), BM_SETSTATE, TRUE, NULL);
 		neighbour_value((g_b_X - 1)*g_b_gameboard->get_columns() + g_b_Y + 1, g_b_X - 1, g_b_Y + 1);
 	}
-	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_Y - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X + 1,g_b_Y - 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X + 1,g_b_Y - 1).flagged == false)) //bottom left diagonally
+	if ((g_b_X + 1 < g_b_gameboard->get_rows()) && (g_b_Y - 1 >= 0) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y - 1).discovered == false) && (g_b_gameboard->get_fields(g_b_X + 1, g_b_Y - 1).flagged == false)) //bottom left diagonally
 	{
 		g_b_gameboard->get_fields(g_b_X + 1, g_b_Y - 1).discovered = true;
 		SendMessage(GetDlgItem(hwnd, (g_b_X + 1)*g_b_gameboard->get_columns() + g_b_Y - 1), BM_SETSTATE, TRUE, NULL);
@@ -578,7 +611,7 @@ void check_neighbours(DWORD_PTR dwRefData)
 }
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y)
 {
-	switch (g_b_gameboard->get_fields(g_b_X,g_b_Y).value)
+	switch (g_b_gameboard->get_fields(g_b_X, g_b_Y).value)
 	{
 	case 0:
 		SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
@@ -654,7 +687,7 @@ void delete_buttons(int old_rows, int old_columns)
 		}
 		delete[] hwnd_matrix[i];
 	}
-	delete []hwnd_matrix;
+	delete[]hwnd_matrix;
 }
 void clear_old_window_change_its_pos_and_dim(int old_rows, int old_columns)
 {
@@ -685,16 +718,16 @@ void unpressed_clear_button_normal_face()
 	}
 	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 }
-void play_again_or_change_level(std::string again_or_level,std::string level, int rows, int columns, int mines)
+void play_again_or_change_level(std::string again_or_level, std::string level, int rows, int columns, int mines)
 {
-	if (again_or_level.compare("again")==0)
-	{ 
+	if (again_or_level.compare("again") == 0)
+	{
 		unpressed_clear_button_normal_face();
 		g_b_gameboard = g_b_gameboard->get_beg_int_exp_cus().compare("Custom") == 0 ?
 			new game_board(g_b_gameboard->get_rows(), g_b_gameboard->get_columns(), g_b_gameboard->get_mines_number()) :
 			new game_board(g_b_gameboard->get_beg_int_exp_cus());
 	}
-	else if (again_or_level.compare("level")==0)
+	else if (again_or_level.compare("level") == 0)
 	{
 		int old_rows = 0;
 		int old_columns = 0;

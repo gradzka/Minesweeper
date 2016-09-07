@@ -33,3 +33,12 @@
 #define ID_ABO1 1035
 #define ID_ABO2 1036
 
+#define IDD_DLG_CUSTOM 1037
+#define ID_ROWS 1038
+#define ID_COLUMNS 1039
+#define ID_MINES 1040
+#define IDC_ROWS_T 1041
+#define IDC_COLUMNS_T 1042
+#define IDC_MINES_T 1043
+#define ID_CANCEL 1044
+
