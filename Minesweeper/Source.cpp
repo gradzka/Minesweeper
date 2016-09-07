@@ -28,7 +28,7 @@ int get_window_height();
 void GetDesktopResolution(int &horizontal, int &vertical);
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
 void load_BITMAP();
-void check_neigbours(DWORD_PTR dwRefData);
+void check_neighbours(DWORD_PTR dwRefData);
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y);
 void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string menu_level_1, std::string menu_level_2, std::string menu_level_3);
 void HWND_matrix_and_subclassing();
@@ -225,6 +225,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1008: //About
 			{
+				DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_ABOUT),
+					hwnd, reinterpret_cast<DLGPROC>(DlgProc));
 				break;
 			}
 		}
@@ -264,15 +266,15 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 			(horizontal / 2 - 280),
 			(vertical / 2 - 170 / 2), 560, 170,
 			SWP_SHOWWINDOW);
-
-		for (int i = 0; i < 9; i++)
-		{
-			SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
-			ID_CTRL += 1;
-			_itoa_s(HighScores[i].time, b, 10);
-			SetDlgItemText(hWndDlg, ID_CTRL, b);
-			ID_CTRL += 1;
-		}
+		
+			for (int i = 0; i < 9; i++)
+			{
+				SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
+				ID_CTRL += 1;
+				_itoa_s(HighScores[i].time, b, 10);
+				SetDlgItemText(hWndDlg, ID_CTRL, b);
+				ID_CTRL += 1;
+			}
 
 		return TRUE;
 
@@ -287,8 +289,14 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case ID_RESET:
-		{	SetWindowText(hWndDlg, "Your Caption Text");
-		break;
+		{	
+			SetWindowText(hWndDlg, "Your Caption Text");
+			break;
+		}
+		case IDD_DLG_ABOUT:
+		{
+			EndDialog(hWndDlg, IDD_DLG_ABOUT);
+			break;
 		}
 		}
 	}
@@ -370,7 +378,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 					g_b_gameboard->get_fields(dwRefData / g_b_gameboard->get_columns(),dwRefData % g_b_gameboard->get_columns()).discovered = true;
 					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETSTATE, TRUE, NULL);
 					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
-					check_neigbours(dwRefData);
+					check_neighbours(dwRefData);
 					check_if_win();
 					break;
 				case 1:
@@ -508,7 +516,7 @@ void load_BITMAP()
 		hbit_BMPs[i] = (HBITMAP)LoadImage(NULL, name.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	}
 }
-void check_neigbours(DWORD_PTR dwRefData)
+void check_neighbours(DWORD_PTR dwRefData)
 {
 	int g_b_X = dwRefData / g_b_gameboard->get_columns();
 	int g_b_Y = dwRefData % g_b_gameboard->get_columns();
@@ -569,7 +577,7 @@ void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y)
 	{
 	case 0:
 		SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
-		check_neigbours(dwRefData);
+		check_neighbours(dwRefData);
 		break;
 	case 1:
 		SendMessage(GetDlgItem(hwnd, (dwRefData)), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[1]);
@@ -694,10 +702,10 @@ void play_again_or_change_level(std::string again_or_level,std::string level, in
 
 		for (int i = 0; i < g_b_gameboard->get_rows()*g_b_gameboard->get_columns(); i++)
 		{
-			SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]);
+			SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]); //box
 		}
 
-		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //normal face
 	}
 	END_OF_GAME = false;
 }

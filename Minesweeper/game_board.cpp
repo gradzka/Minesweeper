@@ -77,6 +77,7 @@ void game_board::create_fields()
 	for (int i = 0; i < rows; i++)
 	{
 		fields[i] = new field[columns];
+
 		for (int j = 0; j < columns; j++)
 		{
 			fields[i][j].value = 0;
@@ -118,9 +119,12 @@ void game_board::rand_mines()
 }
 void game_board::neighbours_mines()
 {
-	for (int i = 0; i < rows; i++)
+	int i=0;
+	int j=0;
+	#pragma omp parallel for private(i,j)
+	for (i = 0; i < rows; i++)
 	{
-		for (int j = 0; j < columns; j++)
+		for (j = 0; j < columns; j++)
 		{
 			if (fields[i][j].value == -1)
 			{

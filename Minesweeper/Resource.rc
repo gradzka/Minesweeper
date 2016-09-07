@@ -1,7 +1,6 @@
 #include <windows.h>
 #include "Resource.h"
 
-
 1000 MENU
 {
 	POPUP "&Game"
@@ -22,7 +21,7 @@
 		MENUITEM "&About", 1008
 	}
 }
-
+// DIALOG BOXES
 IDD_DLG_HIGHSCORES DIALOGEX 0, 0, 310, 75
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "High Scores..."
@@ -55,3 +54,13 @@ RTEXT           "", ID_EXP3_TIME, 285, 38, 15, 10
 DEFPUSHBUTTON   "Reset...", ID_RESET, 93, 55, 50, 14
 DEFPUSHBUTTON   "OK", ID_OK, 165, 55, 50, 14
 END
+
+IDD_DLG_ABOUT DIALOGEX 0, 0, 350, 20
+CAPTION "About"
+FONT 9, "Courier New", 0, 0, 0x0
+	BEGIN
+	LTEXT           "The authors of Windows Minesweeper: Robert Donner and Curt Johnson", ID_ABO1, 10, 18, 300, 10 //x,y
+	LTEXT			"The authors of the copy: Monika Gr¹dzka and Robert Kazimierczak", ID_ABO2, 10, 27, 300, 10
+	CTEXT			"2016", ID_ABO3, 10, 36, 300, 10
+	DEFPUSHBUTTON   "OK", ID_OK, 250, 45, 50, 14
+	END

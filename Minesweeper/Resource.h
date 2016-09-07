@@ -28,3 +28,9 @@
 #define ID_EXP2_TIME 1031
 #define ID_EXP3 1032
 #define ID_EXP3_TIME 1033
+
+#define IDD_DLG_ABOUT 1034
+#define ID_ABO1 1035
+#define ID_ABO2 1036
+#define ID_ABO3 1037
+
