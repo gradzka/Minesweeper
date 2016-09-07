@@ -32,5 +32,4 @@
 #define IDD_DLG_ABOUT 1034
 #define ID_ABO1 1035
 #define ID_ABO2 1036
-#define ID_ABO3 1037
 

@@ -55,12 +55,12 @@ DEFPUSHBUTTON   "Reset...", ID_RESET, 93, 55, 50, 14
 DEFPUSHBUTTON   "OK", ID_OK, 165, 55, 50, 14
 END
 
-IDD_DLG_ABOUT DIALOGEX 0, 0, 350, 20
+IDD_DLG_ABOUT DIALOGEX 0, 0, 300, 20
 CAPTION "About"
 FONT 9, "Courier New", 0, 0, 0x0
 	BEGIN
-	LTEXT           "The authors of Windows Minesweeper: Robert Donner and Curt Johnson", ID_ABO1, 10, 18, 300, 10 //x,y
-	LTEXT			"The authors of the copy: Monika Gr¹dzka and Robert Kazimierczak", ID_ABO2, 10, 27, 300, 10
-	CTEXT			"2016", ID_ABO3, 10, 36, 300, 10
-	DEFPUSHBUTTON   "OK", ID_OK, 250, 45, 50, 14
+	CTEXT           "The authors of Windows Minesweeper: Robert Donner and Curt Johnson\nThe authors of the copy: Monika Gr¹dzka and Robert Kazimierczak",
+	ID_ABO1, 12, 18, 280, 50 //x,y
+	CTEXT			"2016", ID_ABO2, 10, 36, 300, 10
+	DEFPUSHBUTTON   "OK", ID_OK, 257, 45, 40, 14
 	END

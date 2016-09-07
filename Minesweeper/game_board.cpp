@@ -74,11 +74,14 @@ game_board::~game_board()
 void game_board::create_fields()
 {
 	fields = new field*[rows];
-	for (int i = 0; i < rows; i++)
+	int i = 0;
+	int j = 0;
+	#pragma omp parallel for private(i,j)
+	for (i = 0; i < rows; i++)
 	{
 		fields[i] = new field[columns];
 
-		for (int j = 0; j < columns; j++)
+		for (j = 0; j < columns; j++)
 		{
 			fields[i][j].value = 0;
 			fields[i][j].flagged = false;
@@ -121,6 +124,7 @@ void game_board::neighbours_mines()
 {
 	int i=0;
 	int j=0;
+
 	#pragma omp parallel for private(i,j)
 	for (i = 0; i < rows; i++)
 	{
@@ -130,34 +134,42 @@ void game_board::neighbours_mines()
 			{
 				if ((i - 1 >= 0) && (fields[i - 1][j].value != -1))
 				{
+					#pragma omp critical
 					fields[i - 1][j].value++; //up
 				}
 				if ((j + 1 < columns) && (fields[i][j + 1].value != -1))
 				{
+					#pragma omp critical
 					fields[i][j + 1].value++; //right
 				}
 				if ((i + 1 < rows) && (fields[i + 1][j].value != -1))
 				{
+					#pragma omp critical
 					fields[i + 1][j].value++; //down
 				}
 				if ((j - 1 >= 0) && (fields[i][j - 1].value != -1))
 				{
+					#pragma omp critical
 					fields[i][j - 1].value++; //left
 				}
 				if ((i - 1 >= 0) && (j - 1 >= 0) && (fields[i - 1][j - 1].value != -1)) //upper left diagonally
 				{
+					#pragma omp critical
 					fields[i - 1][j - 1].value++;
 				}
 				if ((i - 1 >= 0) && (j + 1 < columns) && (fields[i - 1][j + 1].value != -1)) //upper right diagonally
 				{
+					#pragma omp critical
 					fields[i - 1][j + 1].value++;
 				}
 				if ((i + 1 < rows) && (j - 1 >= 0) && (fields[i + 1][j - 1].value != -1)) //bottom left diagonally
 				{
+					#pragma omp critical
 					fields[i + 1][j - 1].value++;
 				}
 				if ((i + 1 < rows) && (j + 1 < columns) && (fields[i + 1][j + 1].value != -1)) //bottom right diagonally
 				{
+					#pragma omp critical
 					fields[i + 1][j + 1].value++;
 				}
 			}

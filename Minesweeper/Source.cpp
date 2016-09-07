@@ -220,7 +220,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1007: //Exit
 		{
-			PostQuitMessage(0);
+			DestroyWindow(hwnd);
 			break;
 		}
 		case 1008: //About
@@ -260,13 +260,13 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_INITDIALOG:
 
-		GetDesktopResolution(horizontal, vertical);
-		SetWindowPos(hWndDlg,
-			HWND_TOP,
-			(horizontal / 2 - 280),
-			(vertical / 2 - 170 / 2), 560, 170,
-			SWP_SHOWWINDOW);
-		
+			GetDesktopResolution(horizontal, vertical);
+			SetWindowPos(hWndDlg,
+				HWND_TOP,
+				(horizontal / 2 - 280),
+				(vertical / 2 - 170 / 2), 560, 170,
+				SWP_SHOWWINDOW);
+
 			for (int i = 0; i < 9; i++)
 			{
 				SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
@@ -274,8 +274,8 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 				_itoa_s(HighScores[i].time, b, 10);
 				SetDlgItemText(hWndDlg, ID_CTRL, b);
 				ID_CTRL += 1;
-			}
-
+		}
+		
 		return TRUE;
 
 	case WM_COMMAND:
@@ -299,6 +299,11 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		}
+	}
+	case WM_DESTROY:
+	{
+		EndDialog(hWndDlg, IDD_DLG_ABOUT|IDD_DLG_HIGHSCORES);
+		break;
 	}
 	break;
 
@@ -639,9 +644,11 @@ void HWND_matrix_and_subclassing()
 }
 void delete_buttons(int old_rows, int old_columns)
 {
-	for (int i = 0; i < old_rows; i++)
+	int i = 0;
+	int j = 0;
+	for (i = 0; i < old_rows; i++)
 	{
-		for (int j = 0; j < old_columns; j++)
+		for (j = 0; j < old_columns; j++)
 		{
 			DestroyWindow(hwnd_matrix[i][j]);
 		}
@@ -700,7 +707,8 @@ void play_again_or_change_level(std::string again_or_level,std::string level, in
 
 		clear_old_window_change_its_pos_and_dim(old_rows, old_columns);
 
-		for (int i = 0; i < g_b_gameboard->get_rows()*g_b_gameboard->get_columns(); i++)
+		int i = 0;
+		for (i = 0; i < g_b_gameboard->get_rows()*g_b_gameboard->get_columns(); i++)
 		{
 			SendMessage(GetDlgItem(hwnd, i), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]); //box
 		}
@@ -711,9 +719,12 @@ void play_again_or_change_level(std::string again_or_level,std::string level, in
 }
 void check_if_win()
 {
-	for (int i = 0; i < g_b_gameboard->get_rows(); i++)
+	int i = 0;
+	int j = 0;
+
+	for (i = 0; i < g_b_gameboard->get_rows(); i++)
 	{
-		for (int j = 0; j < g_b_gameboard->get_columns(); j++)
+		for (j = 0; j < g_b_gameboard->get_columns(); j++)
 		{
 			if (g_b_gameboard->get_fields(i, j).value != -1 && g_b_gameboard->get_fields(i, j).discovered != true)
 			{
@@ -722,9 +733,10 @@ void check_if_win()
 		}
 	}
 	END_OF_GAME = true;
-	for (int i = 0; i < g_b_gameboard->get_rows(); i++)
+
+	for (i = 0; i < g_b_gameboard->get_rows(); i++)
 	{
-		for (int j = 0; j < g_b_gameboard->get_columns(); j++)
+		for (j = 0; j < g_b_gameboard->get_columns(); j++)
 		{
 			if (g_b_gameboard->get_fields(i, j).value == -1 && g_b_gameboard->get_fields(i, j).discovered == false && g_b_gameboard->get_fields(i, j).flagged == false)
 			{
@@ -734,7 +746,6 @@ void check_if_win()
 	}
 	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[15]);
 	check_and_save_HighScores(100, g_b_gameboard->get_beg_int_exp_cus());
-	return;
 }
 void load_HighScores()
 {
