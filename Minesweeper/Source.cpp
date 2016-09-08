@@ -182,14 +182,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		//{
 		if (g_b_gameboard->no_flagged_mines_number >= 0)
 		{
-			BitBlt(hdc, 0, 8, 18, 20, hdcBitmap, 2, 0, SRCCOPY);
+			BitBlt(hdc, 3, 8, 18, 20, hdcBitmap, 2, 0, SRCCOPY);
 		}
 		else
 		{
-			BitBlt(hdc, 0, 8, 18, 20, hdcBitmap, 22 * 10, 0, SRCCOPY);
+			BitBlt(hdc, 3, 8, 18, 20, hdcBitmap, 22 * 10, 0, SRCCOPY);
 		}
-			BitBlt(hdc, 18, 8, 18, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
-			BitBlt(hdc, 36, 8, 18, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
+			BitBlt(hdc, 21, 8, 18, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
+			BitBlt(hdc, 39, 8, 18, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
 			//GAME_STARTED = false;
 		//}
 
@@ -267,8 +267,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1005: //Custom
 		{
-			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
-			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
 			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_CUSTOM),
 				hwnd, reinterpret_cast<DLGPROC>(CustomProc));
 			break;
@@ -397,6 +395,8 @@ LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam
 		{
 		case ID_OK:
 		{
+			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
+			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
 			TCHAR rows_buffer[7];
 			TCHAR columns_buffer[7];
 			TCHAR mines_buffer[7];
@@ -571,6 +571,10 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
 
 		//FLAG_CLICKED = true; //flag has been discovered;
+		if (END_OF_GAME == true)
+		{
+			break;
+		}
 
 		gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
 		gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
