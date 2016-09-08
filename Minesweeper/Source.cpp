@@ -7,16 +7,6 @@
 #define horizontal_coordinates (horizontal / 2 -  get_window_width() / 2)
 #define vertical_coordinates (vertical / 2 - get_window_height() / 2)
 
-struct score
-{
-	std::string name;
-	int time;
-};
-
-score HighScores[9];
-
-HBITMAP hbit_BMPs[18];
-
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -46,16 +36,31 @@ void check_and_save_HighScores(int your_time, std::string level);
 
 char b[32];
 
+struct score
+{
+	std::string name;
+	int time;
+};
+
+score HighScores[9];
+
+HBITMAP hbit_BMPs[18];
+
 game_board *g_b_gameboard;
 int gl_g_b_X = 0;
 int gl_g_b_Y = 0;
 
 bool END_OF_GAME = false;
+bool Started_TIMER = false;
 HWND hwnd;
 
 HWND **hwnd_matrix;
 HINSTANCE hInstance;
 
+HBITMAP BitMap; //handle to BitMap
+BITMAP Bitmap_Info; //Structure with informaton about bitmap
+
+unsigned int TIMER = 0;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	srand(time(NULL));
@@ -133,6 +138,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	HDC hdc;
+	HDC hdcBitmap; //zmienne na 2 konteksty
+	PAINTSTRUCT ps;
 	switch (msg)
 	{
 	case WM_KEYDOWN:
@@ -145,7 +153,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 	}
 	break;
+	
+	case WM_TIMER:
+	{
+		if (TIMER < 999)
+		{
+			TIMER++; 
+			InvalidateRect(hwnd, NULL, FALSE);
+		}
+	}
+	break;
 
+	case WM_PAINT:
+	{
+		hdc = BeginPaint(hwnd, &ps);
+		hdcBitmap = CreateCompatibleDC(hdc);
+		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
+		BitBlt(hdc, get_window_width() - 73, 8, 20, 20, hdcBitmap, 22 * ((TIMER / 100) % 10) + 2, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
+		BitBlt(hdc, get_window_width() - 55, 8, 20, 20, hdcBitmap, 22 * ((TIMER / 10)%10) + 2, 0, SRCCOPY);
+		BitBlt(hdc, get_window_width() - 37, 8, 20, 20, hdcBitmap, 22*(TIMER%10)+2, 0, SRCCOPY);
+		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
+		DeleteDC(hdcBitmap);
+
+		EndPaint(hwnd, &ps);
+	}
+	break;
 	case WM_LBUTTONDOWN:
 		if (END_OF_GAME == false)
 		{
@@ -166,6 +198,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_DESTROY:
 		delete g_b_gameboard;
+		Started_TIMER = false;
+		KillTimer(hwnd, ID_TIMER);
 		PostQuitMessage(0);
 		break;
 
@@ -261,12 +295,16 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 			(vertical / 2 - 170 / 2), 560, 170,
 			SWP_SHOWWINDOW);
 
+		char buffer_for_highscores[6];
 		for (int i = 0; i < 9; i++)
 		{
 			SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
 			ID_CTRL += 1;
-			_itoa_s(HighScores[i].time, b, 10);
-			SetDlgItemText(hWndDlg, ID_CTRL, b);
+			_itoa_s(HighScores[i].time, buffer_for_highscores, 10);
+			buffer_for_highscores[3] = ' ';
+			buffer_for_highscores[4] = 's';
+			buffer_for_highscores[5] = '\0';
+			SetDlgItemText(hWndDlg, ID_CTRL, buffer_for_highscores);
 			ID_CTRL += 1;
 		}
 
@@ -387,6 +425,11 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		}
 		else
 		{
+			if (Started_TIMER == false)
+			{
+				SetTimer(hwnd, ID_TIMER, 1000, NULL);
+				Started_TIMER = true;
+			}
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //change smile
 
 			gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
@@ -409,7 +452,10 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 				{
 				case -1:
 				{
-					if (END_OF_GAME == false){
+					if (END_OF_GAME == false)
+					{
+						Started_TIMER = false;
+						KillTimer(hwnd, ID_TIMER);
 						SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
 						SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
 
@@ -581,6 +627,13 @@ void load_BITMAPS_and_ICON()
 	HANDLE icon = LoadImage(hInstance, "BMPs\\Crash\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
 	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
 	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+
+	BitMap = (HBITMAP)LoadImage(0, "BMPs\\Crash\\Digits.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	if (BitMap == NULL) // if LoadImage fails, it returns a NULL handle
+	{
+		MessageBox(0, "There's problem with open \"Digits.bmp\"", "No File", MB_ICONERROR);
+	}
+	GetObject(BitMap, sizeof(BITMAP), &Bitmap_Info);
 }
 void check_neighbours(DWORD_PTR dwRefData)
 {
@@ -748,8 +801,14 @@ void unpressed_clear_button_normal_face()
 }
 void play_again_or_change_level(std::string again_or_level, std::string level, int rows, int columns, int mines)
 {
+	TIMER = 0;
+	Started_TIMER = false;
+	KillTimer(hwnd, ID_TIMER);
+
 	if (again_or_level.compare("again") == 0)
 	{
+		InvalidateRect(hwnd, NULL, FALSE);
+
 		unpressed_clear_button_normal_face();
 		g_b_gameboard = g_b_gameboard->get_beg_int_exp_cus().compare("Custom") == 0 ?
 			new game_board(g_b_gameboard->get_rows(), g_b_gameboard->get_columns(), g_b_gameboard->get_mines_number()) :
@@ -757,6 +816,13 @@ void play_again_or_change_level(std::string again_or_level, std::string level, i
 	}
 	else if (again_or_level.compare("level") == 0)
 	{
+		RECT *help_RECT_struct = new RECT;
+
+		help_RECT_struct->left = get_window_width() - 73;
+		help_RECT_struct->right = get_window_width() - 17;
+		help_RECT_struct->top = 8;
+		help_RECT_struct->bottom = 28;
+
 		int old_rows = 0;
 		int old_columns = 0;
 		old_rows = g_b_gameboard->get_rows();
@@ -765,6 +831,9 @@ void play_again_or_change_level(std::string again_or_level, std::string level, i
 		g_b_gameboard = level.compare("Custom") == 0 ?
 			new game_board(rows, columns, mines) :
 			new game_board(level);
+
+		InvalidateRect(hwnd, help_RECT_struct, TRUE);
+		InvalidateRect(hwnd, NULL, FALSE);
 
 		clear_old_window_change_its_pos_and_dim(old_rows, old_columns);
 
@@ -793,6 +862,8 @@ void check_if_win()
 			}
 		}
 	}
+	Started_TIMER = false;
+	KillTimer(hwnd, ID_TIMER);
 	END_OF_GAME = true;
 
 	for (i = 0; i < g_b_gameboard->get_rows(); i++)

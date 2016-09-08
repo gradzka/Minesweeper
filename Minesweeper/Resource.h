@@ -42,3 +42,5 @@
 #define IDC_MINES_T 1043
 #define ID_CANCEL 1044
 
+#define ID_TIMER 1045
+
