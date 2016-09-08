@@ -28,7 +28,7 @@ int get_window_width();
 int get_window_height();
 void GetDesktopResolution(int &horizontal, int &vertical);
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
-void load_BITMAP();
+void load_BITMAPS_and_ICON();
 void check_neighbours(DWORD_PTR dwRefData);
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y);
 void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string menu_level_1, std::string menu_level_2, std::string menu_level_3);
@@ -52,13 +52,13 @@ int gl_g_b_Y = 0;
 
 bool END_OF_GAME = false;
 HWND hwnd;
-HMENU hMenu;
+
 HWND **hwnd_matrix;
-LPSTR ClassName = "Minesweeper";
 HINSTANCE hInstance;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	srand(time(NULL));
 	g_b_gameboard = new game_board("Beginner");
 
 	WNDCLASSEX wc;
@@ -72,7 +72,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)(1);
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = ClassName;
+	wc.lpszClassName = "Minesweeper";
 	wc.hIconSm = 0;
 
 	if (!RegisterClassEx(&wc))
@@ -82,8 +82,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 1;
 	}
 
-	hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(1000));
-
+	HMENU hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(1000));
 	MSG Communique;
 
 	//screen sizes, GetDesktopResolution will update them
@@ -93,10 +92,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	GetDesktopResolution(horizontal, vertical);
 
 	// Creating window
-	hwnd = CreateWindowEx(
-		WS_EX_WINDOWEDGE,
-		ClassName,
-		ClassName,
+	hwnd = CreateWindowEx(WS_EX_WINDOWEDGE,
+		"Minesweeper", "Minesweeper",
 		WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX,
 		horizontal_coordinates,
 		vertical_coordinates,
@@ -112,14 +109,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 1;
 	}
 
-	HANDLE icon = LoadImage(hInstance, "BMPs\\Crash\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
-	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
-
 	HWND hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
 		get_window_width() / 2 - 22, 5, 26, 26, hwnd, (HMENU)-1, hInstance, 0);
 
-	load_BITMAP();
+	load_BITMAPS_and_ICON();
 	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 
 	HWND_matrix_and_subclassing();
@@ -208,11 +201,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1005: //Custom
 		{
-			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_CUSTOM),
-				hwnd, reinterpret_cast<DLGPROC>(CustomProc));
 			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
 			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
-			play_again_or_change_level("level", "Custom",10,17,10);
+			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_CUSTOM),
+				hwnd, reinterpret_cast<DLGPROC>(CustomProc));
 			break;
 		}
 		case 1006: //High Scores
@@ -311,9 +303,21 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+	int horizontal = 0;
+	int vertical = 0;
+
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
+		GetDesktopResolution(horizontal, vertical);
+		SetWindowPos(hWndDlg,
+			HWND_TOP,
+			(horizontal / 2 - 130),
+			(vertical / 2 - 85), 260, 170,
+			SWP_SHOWWINDOW);
+		SetWindowText(GetDlgItem(hWndDlg, IDC_ROWS_T), "9");
+		SetWindowText(GetDlgItem(hWndDlg, IDC_COLUMNS_T), "9");
+		SetWindowText(GetDlgItem(hWndDlg, IDC_MINES_T), "10");
 		return TRUE;
 
 	case WM_COMMAND:
@@ -323,6 +327,13 @@ LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam
 		{
 		case ID_OK:
 		{
+			TCHAR rows_buffer[7];
+			TCHAR columns_buffer[7];
+			TCHAR mines_buffer[7];
+			GetWindowText(GetDlgItem(hWndDlg, IDC_ROWS_T), rows_buffer, 7);
+			GetWindowText(GetDlgItem(hWndDlg, IDC_COLUMNS_T), columns_buffer, 7);
+			GetWindowText(GetDlgItem(hWndDlg, IDC_MINES_T), mines_buffer, 7);
+			play_again_or_change_level("level", "Custom", atoi(rows_buffer), atoi(columns_buffer), atoi(mines_buffer));
 			EndDialog(hWndDlg, NULL);
 			break;
 		}
@@ -330,6 +341,19 @@ LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam
 		{
 			EndDialog(hWndDlg, NULL);
 			break;
+		}
+
+		case IDC_ROWS_T:
+		{
+			return FALSE;
+		}
+		case IDC_COLUMNS_T:
+		{
+			return FALSE;
+		}		
+		case IDC_MINES_T:
+		{
+			return FALSE;
 		}
 		}
 	}
@@ -506,7 +530,7 @@ int get_window_width()
 int get_window_height()
 {
 	int height = 0;
-	height = 98 + 16 * g_b_gameboard->get_rows();
+	height = 96 + 16 * g_b_gameboard->get_rows();
 	return height;
 }
 // width and height in pix:
@@ -543,7 +567,7 @@ HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance)
 	}
 	return hwnd_matrix;
 }
-void load_BITMAP()
+void load_BITMAPS_and_ICON()
 {
 	std::string name = "";
 	char help_bufor[3];
@@ -553,6 +577,10 @@ void load_BITMAP()
 		name = "BMPs\\Crash\\" + std::string(help_bufor) + ".bmp";
 		hbit_BMPs[i] = (HBITMAP)LoadImage(NULL, name.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	}
+
+	HANDLE icon = LoadImage(hInstance, "BMPs\\Crash\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
 }
 void check_neighbours(DWORD_PTR dwRefData)
 {
@@ -824,6 +852,10 @@ void load_HighScores()
 }
 void check_and_save_HighScores(int your_time, std::string level)
 {
+	if (level.compare("Custom") == 0)
+	{
+		return;
+	}
 	int index;
 	index = 0;
 	if (level.compare("Beginner") == 0)

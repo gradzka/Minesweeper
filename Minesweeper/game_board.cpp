@@ -26,7 +26,6 @@ game_board::game_board(std::string beg_int_exp_cus)
 
 	this->create_fields();
 
-	srand(time(NULL));
 	this->rand_mines();
 	this->neighbours_mines();
 }
@@ -59,7 +58,6 @@ game_board::game_board(int a_rows, int a_columns, int a_mines_number)
 
 	mines_number = a_mines_number;
 
-	srand(time(NULL));
 	this->rand_mines();
 	this->neighbours_mines();
 }
