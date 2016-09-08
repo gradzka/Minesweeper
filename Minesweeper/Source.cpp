@@ -3,6 +3,7 @@
 #include "game_board.h"
 #include "Resource.h"
 #include <fstream>
+#include <cmath>
 
 #define horizontal_coordinates (horizontal / 2 -  get_window_width() / 2)
 #define vertical_coordinates (vertical / 2 - get_window_height() / 2)
@@ -61,6 +62,9 @@ HBITMAP BitMap; //handle to BitMap
 BITMAP Bitmap_Info; //Structure with informaton about bitmap
 
 unsigned int TIMER = 0;
+//bool FLAG_CLICKED = false;
+//bool GAME_STARTED = true;
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	srand(time(NULL));
@@ -168,13 +172,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		hdc = BeginPaint(hwnd, &ps);
 		hdcBitmap = CreateCompatibleDC(hdc);
-		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
-		BitBlt(hdc, get_window_width() - 73, 8, 20, 20, hdcBitmap, 22 * ((TIMER / 100) % 10) + 2, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
-		BitBlt(hdc, get_window_width() - 55, 8, 20, 20, hdcBitmap, 22 * ((TIMER / 10)%10) + 2, 0, SRCCOPY);
-		BitBlt(hdc, get_window_width() - 37, 8, 20, 20, hdcBitmap, 22*(TIMER%10)+2, 0, SRCCOPY);
-		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
-		DeleteDC(hdcBitmap);
 
+		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
+		BitBlt(hdc, get_window_width() - 73, 8, 18, 20, hdcBitmap, 22 * ((TIMER / 100) % 10) + 2, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
+		BitBlt(hdc, get_window_width() - 55, 8, 18, 20, hdcBitmap, 22 * ((TIMER / 10)%10) + 2, 0, SRCCOPY);
+		BitBlt(hdc, get_window_width() - 37, 8, 18, 20, hdcBitmap, 22*(TIMER%10)+2, 0, SRCCOPY);
+		
+		//if (GAME_STARTED == true)
+		//{
+		if (g_b_gameboard->no_flagged_mines_number >= 0)
+		{
+			BitBlt(hdc, 0, 8, 18, 20, hdcBitmap, 2, 0, SRCCOPY);
+		}
+		else
+		{
+			BitBlt(hdc, 0, 8, 18, 20, hdcBitmap, 22 * 10, 0, SRCCOPY);
+		}
+			BitBlt(hdc, 18, 8, 18, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
+			BitBlt(hdc, 36, 8, 18, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
+			//GAME_STARTED = false;
+		//}
+
+		//if (FLAG_CLICKED == true){
+			//if (g_b_gameboard->no_flagged_mines_number < 0)
+			//{
+				//BitBlt(hdc, 0, 8, 20, 20, hdcBitmap, 22 * 10 + 2, 0, SRCCOPY);
+			//}
+			//BitBlt(hdc, 18, 8, 20, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
+			//BitBlt(hdc, 36, 8, 20, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
+			//FLAG_CLICKED = false;
+		//}
+
+		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);	
+		DeleteDC(hdcBitmap);
 		EndPaint(hwnd, &ps);
 	}
 	break;
@@ -198,6 +228,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_DESTROY:
 		delete g_b_gameboard;
+		//FLAG_CLICKED = false;
+		//GAME_STARTED = true;
 		Started_TIMER = false;
 		KillTimer(hwnd, ID_TIMER);
 		PostQuitMessage(0);
@@ -455,6 +487,8 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 					if (END_OF_GAME == false)
 					{
 						Started_TIMER = false;
+						//GAME_STARTED = true;
+						//FLAG_CLICKED = false;
 						KillTimer(hwnd, ID_TIMER);
 						SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
 						SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
@@ -535,18 +569,28 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		// Mouse button right-click event handler
 		/*_itoa_s(dwRefData, b, 10);
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
+
+		//FLAG_CLICKED = true; //flag has been discovered;
+
 		gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
 		gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
+		
 
 		if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false && g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
 			g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged = true;
+
+			g_b_gameboard->no_flagged_mines_number--;
+			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		else if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == true && END_OF_GAME == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]);
 			g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged = false;
+
+			g_b_gameboard->no_flagged_mines_number++;
+			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		return TRUE;
 
@@ -804,6 +848,8 @@ void play_again_or_change_level(std::string again_or_level, std::string level, i
 	TIMER = 0;
 	Started_TIMER = false;
 	KillTimer(hwnd, ID_TIMER);
+	//GAME_STARTED = true;
+	//FLAG_CLICKED = false;
 
 	if (again_or_level.compare("again") == 0)
 	{
@@ -863,6 +909,8 @@ void check_if_win()
 		}
 	}
 	Started_TIMER = false;
+	//GAME_STARTED = true;
+	//FLAG_CLICKED = false;
 	KillTimer(hwnd, ID_TIMER);
 	END_OF_GAME = true;
 

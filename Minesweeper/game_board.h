@@ -22,6 +22,7 @@ private:
 	void rand_mines(); //fills matrix with randomly placed mines
 	void neighbours_mines(); //change neighbour mines fields with proper value
 public:
+	int no_flagged_mines_number;
 	game_board(std::string beg_int_exp);
 	game_board(int rows, int columns, int mines_number);
 	~game_board();

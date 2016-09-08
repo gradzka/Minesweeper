@@ -23,7 +23,7 @@ game_board::game_board(std::string beg_int_exp_cus)
 		rows = 16;
 		mines_number = 99;
 	}
-
+	no_flagged_mines_number = mines_number;
 	this->create_fields();
 
 	this->rand_mines();
@@ -57,6 +57,7 @@ game_board::game_board(int a_rows, int a_columns, int a_mines_number)
 	else if (a_mines_number>max_mines_number) a_mines_number = max_mines_number;
 
 	mines_number = a_mines_number;
+	no_flagged_mines_number = mines_number;
 
 	this->rand_mines();
 	this->neighbours_mines();
