@@ -24,6 +24,7 @@
 
 // //DIALOG BOX HIGHSCORES
 IDD_DLG_HIGHSCORES DIALOGEX 0, 0, 310, 75
+STYLE DS_CENTER | WS_SYSMENU
 CAPTION "High Scores..."
 FONT 9, "Courier New", 0, 0, 0x0
 BEGIN
@@ -56,18 +57,19 @@ DEFPUSHBUTTON   "OK", ID_OK, 165, 52, 50, 14
 END
 
 //DIALOG BOX ABOUT
-IDD_DLG_ABOUT DIALOGEX 0, 0, 300, 20
+IDD_DLG_ABOUT DIALOGEX 0, 0, 320, 70
+STYLE DS_CENTER | WS_SYSMENU
 CAPTION "About"
 FONT 9, "Courier New", 0, 0, 0x0
 	BEGIN
-	CTEXT           "The authors of Windows Minesweeper: Robert Donner and Curt Johnson\nThe authors of the copy: Monika Gr¹dzka and Robert Kazimierczak",
-	ID_ABO1, 12, 18, 280, 50 //x,y
-	CTEXT			"2016", ID_ABO2, 10, 36, 300, 10
+	CTEXT           "The authors of Windows Minesweeper: Robert Donner and Curt Johnson\nThe authors of the copy: Monika Gr¹dzka and Robert Kazimierczak\n\n2016",
+	ID_ABO, 0, 16, 320, 50 //x,y
 	DEFPUSHBUTTON   "OK", ID_OK, 257, 45, 40, 14
 	END
 
 //DIALOG BOX CUSTOM
 IDD_DLG_CUSTOM DIALOGEX 0, 0, 140, 70
+STYLE DS_CENTER | WS_SYSMENU
 CAPTION "Custom"
 	FONT 9, "Courier New", 0, 0, 0x0
 	BEGIN
@@ -79,4 +81,14 @@ CAPTION "Custom"
 	EDITTEXT		IDC_ROWS_T, 45, 18, 28, 10,	ES_NUMBER
 	EDITTEXT		IDC_COLUMNS_T, 45, 30, 28, 10, ES_NUMBER
 	EDITTEXT		IDC_MINES_T, 45, 42, 28, 10, ES_NUMBER
+	END
+
+//DIALOG BOX New HIGH SCORE
+IDD_DLG_NEW_SCORE DIALOGEX 0, 0, 140, 90
+STYLE WS_POPUPWINDOW | DS_CENTER
+	FONT 9, "Courier New", 0, 0, 0x0
+	BEGIN
+	CTEXT			"", ID_CONGRATULATIONS, 0, 10, 140, 45
+	EDITTEXT		IDC_NAME, 36, 56, 68, 10
+	DEFPUSHBUTTON   "OK", ID_OK, 50, 70, 40, 14
 	END

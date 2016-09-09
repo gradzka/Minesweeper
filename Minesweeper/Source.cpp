@@ -11,8 +11,10 @@
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK HighScoresProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK AboutProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK NewScoreProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
 int get_window_width();
@@ -30,6 +32,7 @@ void unpressed_clear_button_normal_face();
 void play_again_or_change_level(std::string again_or_level, std::string level = "", int rows = 0, int columns = 0, int mines = 0);
 void check_if_win();
 void load_HighScores();
+void reset_HighScores();
 void check_and_save_HighScores(int your_time, std::string level);
 
 #include <Commctrl.h>
@@ -64,6 +67,8 @@ BITMAP Bitmap_Info; //Structure with informaton about bitmap
 unsigned int TIMER = 0;
 //bool FLAG_CLICKED = false;
 //bool GAME_STARTED = true;
+
+TCHAR PlayerName[17];
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -274,7 +279,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case 1006: //High Scores
 		{
 			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
-				hwnd, reinterpret_cast<DLGPROC>(DlgProc));
+				hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 			break;
 		}
 		case 1007: //Exit
@@ -285,7 +290,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case 1008: //About
 		{
 			DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_ABOUT),
-				hwnd, reinterpret_cast<DLGPROC>(DlgProc));
+				hwnd, reinterpret_cast<DLGPROC>(AboutProc));
 			break;
 		}
 		}
@@ -309,31 +314,37 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
-LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK HighScoresProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	int ID_CTRL = 1016;
-	int horizontal = 0;
-	int vertical = 0;
 
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
-		GetDesktopResolution(horizontal, vertical);
-		SetWindowPos(hWndDlg,
-			HWND_TOP,
-			(horizontal / 2 - 280),
-			(vertical / 2 - 170 / 2), 560, 170,
-			SWP_SHOWWINDOW);
-
 		char buffer_for_highscores[6];
 		for (int i = 0; i < 9; i++)
 		{
 			SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
 			ID_CTRL += 1;
 			_itoa_s(HighScores[i].time, buffer_for_highscores, 10);
-			buffer_for_highscores[3] = ' ';
-			buffer_for_highscores[4] = 's';
-			buffer_for_highscores[5] = '\0';
+			if (HighScores[i].time < 10)
+			{
+				buffer_for_highscores[1] = ' ';
+				buffer_for_highscores[2] = 's';
+				buffer_for_highscores[3] = '\0';
+			}
+			else if (HighScores[i].time < 100)
+			{
+				buffer_for_highscores[2] = ' ';
+				buffer_for_highscores[3] = 's';
+				buffer_for_highscores[4] = '\0';
+			}
+			else
+			{
+				buffer_for_highscores[3] = ' ';
+				buffer_for_highscores[4] = 's';
+				buffer_for_highscores[5] = '\0';
+			}
 			SetDlgItemText(hWndDlg, ID_CTRL, buffer_for_highscores);
 			ID_CTRL += 1;
 		}
@@ -352,12 +363,57 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 		}
 		case ID_RESET:
 		{
-			SetWindowText(hWndDlg, "Your Caption Text");
+			reset_HighScores();
+			char buffer_for_highscores[6];
+			for (int i = 0; i < 9; i++)
+			{
+				SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
+				ID_CTRL += 1;
+				_itoa_s(HighScores[i].time, buffer_for_highscores, 10);
+				buffer_for_highscores[3] = ' ';
+				buffer_for_highscores[4] = 's';
+				buffer_for_highscores[5] = '\0';
+				SetDlgItemText(hWndDlg, ID_CTRL, buffer_for_highscores);
+				ID_CTRL += 1;
+			}
 			break;
 		}
 		}
+		break;
 	}
-	case WM_DESTROY:
+	case WM_CLOSE:
+	{
+		EndDialog(hWndDlg, NULL); //NULL - value to return
+		break;
+	}
+	break;
+
+	default: return FALSE;
+	}
+
+	return FALSE;
+}
+LRESULT CALLBACK AboutProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (Msg)
+	{
+	case WM_INITDIALOG:
+		return TRUE;
+
+	case WM_COMMAND:
+	{
+		// reakcja na przyciski
+		switch (LOWORD(wParam))
+		{
+		case ID_OK:
+		{
+			EndDialog(hWndDlg, NULL);
+			break;
+		}
+		}
+		break;
+	}
+	case WM_CLOSE:
 	{
 		EndDialog(hWndDlg, NULL); //NULL - value to return
 		break;
@@ -371,18 +427,9 @@ LRESULT CALLBACK DlgProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	int horizontal = 0;
-	int vertical = 0;
-
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
-		GetDesktopResolution(horizontal, vertical);
-		SetWindowPos(hWndDlg,
-			HWND_TOP,
-			(horizontal / 2 - 130),
-			(vertical / 2 - 85), 260, 170,
-			SWP_SHOWWINDOW);
 		SetWindowText(GetDlgItem(hWndDlg, IDC_ROWS_T), "9");
 		SetWindowText(GetDlgItem(hWndDlg, IDC_COLUMNS_T), "9");
 		SetWindowText(GetDlgItem(hWndDlg, IDC_MINES_T), "10");
@@ -412,22 +459,50 @@ LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam
 			EndDialog(hWndDlg, NULL);
 			break;
 		}
-
-		case IDC_ROWS_T:
-		{
-			return FALSE;
 		}
-		case IDC_COLUMNS_T:
-		{
-			return FALSE;
-		}		
-		case IDC_MINES_T:
-		{
-			return FALSE;
-		}
-		}
+		break;
 	}
-	case WM_DESTROY:
+	case WM_CLOSE:
+	{
+		EndDialog(hWndDlg, NULL); //NULL - value to return
+		break;
+	}
+	break;
+
+	default: return FALSE;
+	}
+
+	return FALSE;
+}
+LRESULT CALLBACK NewScoreProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	std::string congratulations = g_b_gameboard->get_beg_int_exp_cus();
+	congratulations[0] = congratulations[0] + 32;
+
+	switch (Msg)
+	{
+	case WM_INITDIALOG:
+
+		congratulations = "Congratulations!\n\nYou have one of the fastest times for " + congratulations + " level.\nPlease enter your name.";
+		SetDlgItemText(hWndDlg, ID_CONGRATULATIONS, congratulations.c_str());
+		SetWindowText(GetDlgItem(hWndDlg, IDC_NAME), "Player");
+		return TRUE;
+
+	case WM_COMMAND:
+	{
+		// reakcja na przyciski
+		switch (LOWORD(wParam))
+		{
+		case ID_OK:
+		{
+			GetWindowText(GetDlgItem(hWndDlg, IDC_NAME), PlayerName, 17);
+			EndDialog(hWndDlg, NULL);
+			break;
+		}
+		}
+		break;
+	}
+	case WM_CLOSE:
 	{
 		EndDialog(hWndDlg, NULL); //NULL - value to return
 		break;
@@ -929,7 +1004,7 @@ void check_if_win()
 		}
 	}
 	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[15]);
-	check_and_save_HighScores(100, g_b_gameboard->get_beg_int_exp_cus());
+	check_and_save_HighScores(TIMER, g_b_gameboard->get_beg_int_exp_cus());
 }
 void load_HighScores()
 {
@@ -937,27 +1012,7 @@ void load_HighScores()
 	file.open("HighScores.txt", std::ios::in);
 	if (!file.is_open())
 	{
-
-		file.open("HighScores.txt", std::ios::out);
-		for (int i = 0; i < 9; i++)
-		{
-			if (i == 0)
-			{
-				file << "Beginner\n";
-			}
-			if (i == 3)
-			{
-				file << "\nIntermediate\n";
-			}
-			if (i == 6)
-			{
-				file << "\nExpert\n";
-			}
-			file << "Anonymous 999\n";
-			HighScores[i].name = "Anonymous";
-			HighScores[i].time = 999;
-		}
-		file.close();
+		reset_HighScores();
 	}
 	else
 	{
@@ -972,6 +1027,30 @@ void load_HighScores()
 		}
 		file.close();
 	}
+}
+void reset_HighScores()
+{
+	std::fstream file;
+	file.open("HighScores.txt", std::ios::out | std::ios::trunc);
+	for (int i = 0; i < 9; i++)
+	{
+		if (i == 0)
+		{
+			file << "Beginner\n";
+		}
+		if (i == 3)
+		{
+			file << "\nIntermediate\n";
+		}
+		if (i == 6)
+		{
+			file << "\nExpert\n";
+		}
+		file << "Anonymous 999\n";
+		HighScores[i].name = "Anonymous";
+		HighScores[i].time = 999;
+	}
+	file.close();
 }
 void check_and_save_HighScores(int your_time, std::string level)
 {
@@ -996,23 +1075,29 @@ void check_and_save_HighScores(int your_time, std::string level)
 
 	if (your_time < HighScores[index].time)
 	{
+		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_NEW_SCORE),
+			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
 		HighScores[index + 2].name = HighScores[index + 1].name;
 		HighScores[index + 2].time = HighScores[index + 1].time;
 		HighScores[index + 1].name = HighScores[index].name;
 		HighScores[index + 1].time = HighScores[index].time;
-		HighScores[index].name = "Player";
+		HighScores[index].name = PlayerName;
 		HighScores[index].time = your_time;
 	}
 	else if (your_time < HighScores[index + 1].time)
 	{
+		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_NEW_SCORE),
+			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
 		HighScores[index + 2].name = HighScores[index + 1].name;
 		HighScores[index + 2].time = HighScores[index + 1].time;
-		HighScores[index + 1].name = "Player";
+		HighScores[index + 1].name = PlayerName;
 		HighScores[index + 1].time = your_time;
 	}
 	else if (your_time < HighScores[index + 2].time)
 	{
-		HighScores[index + 2].name = "Player";
+		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_NEW_SCORE),
+			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
+		HighScores[index + 2].name = PlayerName;
 		HighScores[index + 2].time = your_time;
 	}
 
@@ -1038,4 +1123,7 @@ void check_and_save_HighScores(int your_time, std::string level)
 		file << "\n";
 	}
 	file.close();
+
+	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
+		hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 }
