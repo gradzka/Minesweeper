@@ -21,7 +21,7 @@ int get_window_width();
 int get_window_height();
 void GetDesktopResolution(int &horizontal, int &vertical);
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
-void load_BITMAPS_and_ICON();
+void load_BITMAPS_and_ICON(std::string skin);
 void check_neighbours(DWORD_PTR dwRefData);
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y);
 void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string menu_level_1, std::string menu_level_2, std::string menu_level_3);
@@ -34,6 +34,7 @@ void check_if_win();
 void load_HighScores();
 void reset_HighScores();
 void check_and_save_HighScores(int your_time, std::string level);
+void change_skins(std::string skin);
 
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
@@ -126,7 +127,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND hwnd_smile = CreateWindowEx(0, "BUTTON", "", WS_CHILD | WS_VISIBLE | BS_BITMAP,
 		get_window_width() / 2 - 22, 5, 26, 26, hwnd, (HMENU)-1, hInstance, 0);
 
-	load_BITMAPS_and_ICON();
+	load_BITMAPS_and_ICON("Classic");
 	SendMessage(hwnd_smile, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 
 	HWND_matrix_and_subclassing();
@@ -162,12 +163,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 	}
 	break;
-	
+
 	case WM_TIMER:
 	{
 		if (TIMER < 999)
 		{
-			TIMER++; 
+			TIMER++;
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 	}
@@ -180,9 +181,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
 		BitBlt(hdc, get_window_width() - 73, 8, 18, 20, hdcBitmap, 22 * ((TIMER / 100) % 10) + 2, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
-		BitBlt(hdc, get_window_width() - 55, 8, 18, 20, hdcBitmap, 22 * ((TIMER / 10)%10) + 2, 0, SRCCOPY);
-		BitBlt(hdc, get_window_width() - 37, 8, 18, 20, hdcBitmap, 22*(TIMER%10)+2, 0, SRCCOPY);
-		
+		BitBlt(hdc, get_window_width() - 55, 8, 18, 20, hdcBitmap, 22 * ((TIMER / 10) % 10) + 2, 0, SRCCOPY);
+		BitBlt(hdc, get_window_width() - 37, 8, 18, 20, hdcBitmap, 22 * (TIMER % 10) + 2, 0, SRCCOPY);
+
 		//if (GAME_STARTED == true)
 		//{
 		if (g_b_gameboard->no_flagged_mines_number >= 0)
@@ -193,22 +194,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			BitBlt(hdc, 3, 8, 18, 20, hdcBitmap, 22 * 10, 0, SRCCOPY);
 		}
-			BitBlt(hdc, 21, 8, 18, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
-			BitBlt(hdc, 39, 8, 18, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
-			//GAME_STARTED = false;
+		BitBlt(hdc, 21, 8, 18, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
+		BitBlt(hdc, 39, 8, 18, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
+		//GAME_STARTED = false;
 		//}
 
 		//if (FLAG_CLICKED == true){
-			//if (g_b_gameboard->no_flagged_mines_number < 0)
-			//{
-				//BitBlt(hdc, 0, 8, 20, 20, hdcBitmap, 22 * 10 + 2, 0, SRCCOPY);
-			//}
-			//BitBlt(hdc, 18, 8, 20, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
-			//BitBlt(hdc, 36, 8, 20, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
-			//FLAG_CLICKED = false;
+		//if (g_b_gameboard->no_flagged_mines_number < 0)
+		//{
+		//BitBlt(hdc, 0, 8, 20, 20, hdcBitmap, 22 * 10 + 2, 0, SRCCOPY);
+		//}
+		//BitBlt(hdc, 18, 8, 20, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
+		//BitBlt(hdc, 36, 8, 20, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
+		//FLAG_CLICKED = false;
 		//}
 
-		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);	
+		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
 		DeleteDC(hdcBitmap);
 		EndPaint(hwnd, &ps);
 	}
@@ -293,6 +294,34 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				hwnd, reinterpret_cast<DLGPROC>(AboutProc));
 			break;
 		}
+		//Skins
+		case 1050: //Classic Theme
+		{
+			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_CHECKED);
+			//InvalidateRect(hwnd, NULL, FALSE);
+			change_skins("Classic");
+			break;
+		}
+		case 1051: //Crash Bandicoot
+		{
+			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_CHECKED);
+			//load_BITMAPS_and_ICON("Crash");
+			change_skins("Crash");
+			break;
+		}
+		case 1052: //Super Mario
+		{
+			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_CHECKED);
+			change_skins("Mario");
+			break;
+		}
+
 		}
 
 		switch (HIWORD(wParam))
@@ -566,6 +595,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 						//FLAG_CLICKED = false;
 						KillTimer(hwnd, ID_TIMER);
 						SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
+						g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).last_clicked = true;
 						SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
 
 						for (int i = 0; i < g_b_gameboard->get_rows(); i++)
@@ -577,11 +607,13 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 									if (g_b_gameboard->get_fields(i, j).flagged == false)
 									{
 										SendMessage(GetDlgItem(hwnd, g_b_gameboard->get_columns() * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
+										g_b_gameboard->get_fields(i, j).discovered = true;
 									}
 								}
 								else if (g_b_gameboard->get_fields(i, j).value != -1 && g_b_gameboard->get_fields(i, j).flagged == true)
 								{
 									SendMessage(GetDlgItem(hwnd, g_b_gameboard->get_columns() * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
+									g_b_gameboard->get_fields(i, j).discovered = true;
 								}
 
 							}
@@ -594,7 +626,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 				case 0:
 					g_b_gameboard->get_fields(dwRefData / g_b_gameboard->get_columns(), dwRefData % g_b_gameboard->get_columns()).discovered = true;
 					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETSTATE, TRUE, NULL);
-					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
+					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]);
 					check_neighbours(dwRefData);
 					check_if_win();
 					break;
@@ -653,11 +685,11 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 		gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
 		gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
-		
+
 
 		if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false && g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered == false)
 		{
-			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]); // set the flag Bitmap when first click
+			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]); // set the flag Bitmap when first click
 			g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged = true;
 
 			g_b_gameboard->no_flagged_mines_number--;
@@ -736,21 +768,23 @@ HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance)
 	}
 	return hwnd_matrix;
 }
-void load_BITMAPS_and_ICON()
+void load_BITMAPS_and_ICON(std::string skin)
 {
 	std::string name = "";
 	char help_bufor[3];
 	for (int i = 0; i < 18; i++)
 	{
 		_itoa_s(i, help_bufor, 10);
-		name = "BMPs\\Crash\\" + std::string(help_bufor) + ".bmp";
+		name = "BMPs\\" + skin + "\\" + std::string(help_bufor) + ".bmp";
 		hbit_BMPs[i] = (HBITMAP)LoadImage(NULL, name.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_LOADFROMFILE);
 	}
+	name = "BMPs\\" + skin + "\\icon.ico";
 
-	HANDLE icon = LoadImage(hInstance, "BMPs\\Crash\\icon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+	HANDLE icon = LoadImage(hInstance, name.c_str(), IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
 	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
 	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
 
+	name = "BMPs\\" + skin + "\\Digits.bmp";
 	BitMap = (HBITMAP)LoadImage(0, "BMPs\\Crash\\Digits.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	if (BitMap == NULL) // if LoadImage fails, it returns a NULL handle
 	{
@@ -818,7 +852,7 @@ void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y)
 	switch (g_b_gameboard->get_fields(g_b_X, g_b_Y).value)
 	{
 	case 0:
-		SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
+		SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]);
 		check_neighbours(dwRefData);
 		break;
 	case 1:
@@ -999,11 +1033,12 @@ void check_if_win()
 		{
 			if (g_b_gameboard->get_fields(i, j).value == -1 && g_b_gameboard->get_fields(i, j).discovered == false && g_b_gameboard->get_fields(i, j).flagged == false)
 			{
-				SendMessage(GetDlgItem(hwnd, g_b_gameboard->get_columns() * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[0]);
+				SendMessage(GetDlgItem(hwnd, g_b_gameboard->get_columns() * i + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
 			}
 		}
 	}
 	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[15]);
+	g_b_gameboard->change_victory();
 	check_and_save_HighScores(TIMER, g_b_gameboard->get_beg_int_exp_cus());
 }
 void load_HighScores()
@@ -1126,4 +1161,62 @@ void check_and_save_HighScores(int your_time, std::string level)
 
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
 		hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
+}
+void change_skins(std::string skin)
+{
+	load_BITMAPS_and_ICON(skin);
+	if (END_OF_GAME == false)
+	{
+		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
+	}
+	else
+	{
+		if (g_b_gameboard->get_victory() == true)
+		{
+			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[15]);
+		}
+		else
+		{
+			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
+		}
+	}
+	for (int i = 0; i < g_b_gameboard->get_rows(); i++)
+	{
+		for (int j = 0; j < g_b_gameboard->get_columns(); j++)
+		{
+			if (g_b_gameboard->get_fields(i, j).flagged == true)
+			{
+				if (g_b_gameboard->get_fields(i, j).value + 1 != 0)
+				{
+					SendMessage(GetDlgItem(hwnd, i*g_b_gameboard->get_columns() + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
+				}
+				else
+				{
+					SendMessage(GetDlgItem(hwnd, i*g_b_gameboard->get_columns() + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]);
+				}
+			}
+			else if (g_b_gameboard->get_fields(i, j).discovered == false)
+			{
+				SendMessage(GetDlgItem(hwnd, i*g_b_gameboard->get_columns() + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]);
+			}
+			else //discovered
+			{
+				if (g_b_gameboard->get_fields(i, j).value + 1 == 0)
+				{
+					if (g_b_gameboard->get_fields(i, j).last_clicked == true)
+					{
+						SendMessage(GetDlgItem(hwnd, i*g_b_gameboard->get_columns() + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
+					}
+					else
+					{
+						SendMessage(GetDlgItem(hwnd, i*g_b_gameboard->get_columns() + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[9]);
+					}
+				}
+				else
+				{
+					SendMessage(GetDlgItem(hwnd, i*g_b_gameboard->get_columns() + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[g_b_gameboard->get_fields(i, j).value]);
+				}
+			}
+		}
+	}
 }

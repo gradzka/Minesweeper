@@ -13,7 +13,15 @@
 			MENUITEM "&Custom...", 1005
 			MENUITEM SEPARATOR
 			MENUITEM "&High Scores...", 1006
+
 			MENUITEM SEPARATOR
+			POPUP "&Skin"
+		{
+			MENUITEM "&Classic Theme", 1050, CHECKED
+				MENUITEM "&Crash Bandicoot", 1051,
+				MENUITEM "&Super Mario", 1052
+		}
+		MENUITEM SEPARATOR
 			MENUITEM "&Exit", 1007
 	}
 	POPUP "&Help"
@@ -61,34 +69,34 @@ IDD_DLG_ABOUT DIALOGEX 0, 0, 320, 70
 STYLE DS_CENTER | WS_SYSMENU
 CAPTION "About"
 FONT 9, "Courier New", 0, 0, 0x0
-	BEGIN
-	CTEXT           "The authors of Windows Minesweeper: Robert Donner and Curt Johnson\nThe authors of the copy: Monika Gr¹dzka and Robert Kazimierczak\n\n2016",
-	ID_ABO, 0, 16, 320, 50 //x,y
-	DEFPUSHBUTTON   "OK", ID_OK, 257, 45, 40, 14
-	END
+BEGIN
+CTEXT           "The authors of Windows Minesweeper: Robert Donner and Curt Johnson\nThe authors of the copy: Monika Gr¹dzka and Robert Kazimierczak\n\n2016",
+ID_ABO, 0, 16, 320, 50 //x,y
+DEFPUSHBUTTON   "OK", ID_OK, 257, 45, 40, 14
+END
 
 //DIALOG BOX CUSTOM
 IDD_DLG_CUSTOM DIALOGEX 0, 0, 140, 70
 STYLE DS_CENTER | WS_SYSMENU
 CAPTION "Custom"
-	FONT 9, "Courier New", 0, 0, 0x0
-	BEGIN
-	LTEXT			"Height:", ID_ROWS, 10, 18, 50, 10
-	LTEXT			"Width:", ID_COLUMNS, 10, 30, 50, 10
-	LTEXT			"Mines:", ID_MINES, 10, 42, 50, 10
-	DEFPUSHBUTTON   "Cancel", ID_CANCEL, 90, 40, 40, 14
-	DEFPUSHBUTTON   "OK", ID_OK, 90, 16, 40, 14
-	EDITTEXT		IDC_ROWS_T, 45, 18, 28, 10,	ES_NUMBER
-	EDITTEXT		IDC_COLUMNS_T, 45, 30, 28, 10, ES_NUMBER
-	EDITTEXT		IDC_MINES_T, 45, 42, 28, 10, ES_NUMBER
-	END
+FONT 9, "Courier New", 0, 0, 0x0
+BEGIN
+LTEXT			"Height:", ID_ROWS, 10, 18, 50, 10
+LTEXT			"Width:", ID_COLUMNS, 10, 30, 50, 10
+LTEXT			"Mines:", ID_MINES, 10, 42, 50, 10
+DEFPUSHBUTTON   "Cancel", ID_CANCEL, 90, 40, 40, 14
+DEFPUSHBUTTON   "OK", ID_OK, 90, 16, 40, 14
+EDITTEXT		IDC_ROWS_T, 45, 18, 28, 10, ES_NUMBER
+EDITTEXT		IDC_COLUMNS_T, 45, 30, 28, 10, ES_NUMBER
+EDITTEXT		IDC_MINES_T, 45, 42, 28, 10, ES_NUMBER
+END
 
 //DIALOG BOX New HIGH SCORE
 IDD_DLG_NEW_SCORE DIALOGEX 0, 0, 140, 90
 STYLE WS_POPUPWINDOW | DS_CENTER
-	FONT 9, "Courier New", 0, 0, 0x0
-	BEGIN
-	CTEXT			"", ID_CONGRATULATIONS, 0, 10, 140, 45
-	EDITTEXT		IDC_NAME, 36, 56, 68, 10
-	DEFPUSHBUTTON   "OK", ID_OK, 50, 70, 40, 14
-	END
+FONT 9, "Courier New", 0, 0, 0x0
+BEGIN
+CTEXT			"", ID_CONGRATULATIONS, 0, 10, 140, 45
+EDITTEXT		IDC_NAME, 36, 56, 68, 10
+DEFPUSHBUTTON   "OK", ID_OK, 50, 70, 40, 14
+END

@@ -8,6 +8,7 @@ struct field
 	int value;		//-1 mine, 0..8 mine neighbour
 	bool flagged;	//flag is set
 	bool discovered;//player discover the value of field
+	bool last_clicked; //false - not clicked
 };
 #pragma once
 class game_board
@@ -21,6 +22,7 @@ private:
 	void create_fields(); //create matrix
 	void rand_mines(); //fills matrix with randomly placed mines
 	void neighbours_mines(); //change neighbour mines fields with proper value
+	bool victory = false;
 public:
 	int no_flagged_mines_number;
 	game_board(std::string beg_int_exp);
@@ -32,6 +34,8 @@ public:
 	int get_mines_number(){ return mines_number; }
 	std::string get_beg_int_exp_cus(){ return beg_int_exp_cus; }
 	field &get_fields(int x_pos, int y_pos){ return fields[x_pos][y_pos]; }
+	void change_victory(){ victory = true; }
+	bool get_victory(){ return victory; }
 
 	void show_fields();
 };
