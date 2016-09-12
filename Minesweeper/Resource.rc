@@ -15,7 +15,7 @@
 			MENUITEM "&High Scores...", 1006
 
 			MENUITEM SEPARATOR
-			POPUP "&Skin"
+			POPUP "&Skins"
 		{
 			MENUITEM "&Classic Theme", 1050, CHECKED
 				MENUITEM "&Crash Bandicoot", 1051,

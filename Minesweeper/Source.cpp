@@ -161,22 +161,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		hdcBitmap = CreateCompatibleDC(hdc);
 
 		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
-		BitBlt(hdc, get_window_width() - 73, 8, 18, 20, hdcBitmap, 22 * ((high_score->get_TIMER() / 100) % 10) + 2, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
-		BitBlt(hdc, get_window_width() - 55, 8, 18, 20, hdcBitmap, 22 * ((high_score->get_TIMER() / 10) % 10) + 2, 0, SRCCOPY);
-		BitBlt(hdc, get_window_width() - 37, 8, 18, 20, hdcBitmap, 22 * (high_score->get_TIMER() % 10) + 2, 0, SRCCOPY);
+		BitBlt(hdc, get_window_width() - 69, 6, 15, 23, hdcBitmap, 17 * ((high_score->get_TIMER() / 100) % 10) + 1, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
+		BitBlt(hdc, get_window_width() - 54, 6, 15, 23, hdcBitmap, 17 * ((high_score->get_TIMER() / 10) % 10) + 1, 0, SRCCOPY);
+		BitBlt(hdc, get_window_width() - 39, 6, 15, 23, hdcBitmap, 17 * (high_score->get_TIMER() % 10) + 1, 0, SRCCOPY);
 
 		//if (GAME_STARTED == true)
 		//{
 		if (g_b_gameboard->no_flagged_mines_number >= 0)
 		{
-			BitBlt(hdc, 3, 8, 18, 20, hdcBitmap, 2, 0, SRCCOPY);
+			BitBlt(hdc, 7, 6, 15, 23, hdcBitmap, 1, 0, SRCCOPY);
 		}
 		else
 		{
-			BitBlt(hdc, 3, 8, 18, 20, hdcBitmap, 22 * 10, 0, SRCCOPY);
+			BitBlt(hdc, 7, 6, 15, 23, hdcBitmap, 17 * 10 + 1, 0, SRCCOPY);
 		}
-		BitBlt(hdc, 21, 8, 18, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
-		BitBlt(hdc, 39, 8, 18, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
+		BitBlt(hdc, 22, 6, 15, 23, hdcBitmap, abs(17 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 1, 0, SRCCOPY);
+		BitBlt(hdc, 37, 6, 15, 23, hdcBitmap, abs(17 * (g_b_gameboard->no_flagged_mines_number % 10)) + 1, 0, SRCCOPY);
 		//GAME_STARTED = false;
 		//}
 
@@ -768,7 +768,7 @@ void load_BITMAPS_and_ICON(std::string skin)
 	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
 
 	name = "BMPs\\" + skin + "\\Digits.bmp";
-	BitMap = (HBITMAP)LoadImage(0, "BMPs\\Crash\\Digits.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	BitMap = (HBITMAP)LoadImage(0, name.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	if (BitMap == NULL) // if LoadImage fails, it returns a NULL handle
 	{
 		MessageBox(0, "There's problem with open \"Digits.bmp\"", "No File", MB_ICONERROR);
@@ -1027,7 +1027,6 @@ void check_if_win()
 	g_b_gameboard->change_victory();
 	check_and_save_HighScores(high_score->get_TIMER(), g_b_gameboard->get_beg_int_exp_cus());
 }
-
 void check_and_save_HighScores(int your_time, std::string level)
 {
 	if (level.compare("Custom") == 0)
@@ -1061,6 +1060,8 @@ void check_and_save_HighScores(int your_time, std::string level)
 
 		high_score->change_i_HighScores_name(index, high_score->get_PlayerName());
 		high_score->change_i_HighScores_time_2(index, your_time);
+		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
+			hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 	}
 	else if (your_time < high_score->get_i_HighScores_time(index + 1))
 	{
@@ -1071,6 +1072,8 @@ void check_and_save_HighScores(int your_time, std::string level)
 
 		high_score->change_i_HighScores_name(index+1, high_score->get_PlayerName());
 		high_score->change_i_HighScores_time_2(index+1, your_time);
+		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
+			hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 	}
 	else if (your_time < high_score->get_i_HighScores_time(index + 2))
 	{
@@ -1078,6 +1081,8 @@ void check_and_save_HighScores(int your_time, std::string level)
 			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
 		high_score->change_i_HighScores_name(index+2, high_score->get_PlayerName());
 		high_score->change_i_HighScores_time_2(index + 2, your_time);
+		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
+			hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 	}
 
 	std::fstream file;
@@ -1102,9 +1107,6 @@ void check_and_save_HighScores(int your_time, std::string level)
 		file << "\n";
 	}
 	file.close();
-
-	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
-		hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 }
 void change_skins(std::string skin)
 {
@@ -1163,4 +1165,5 @@ void change_skins(std::string skin)
 			}
 		}
 	}
+	InvalidateRect(hwnd, NULL, FALSE);
 }
