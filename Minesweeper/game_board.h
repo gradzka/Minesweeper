@@ -22,9 +22,10 @@ private:
 	void create_fields(); //create matrix
 	void rand_mines(); //fills matrix with randomly placed mines
 	void neighbours_mines(); //change neighbour mines fields with proper value
-	bool victory = false;
+	bool victory = false; //variable used to change or not main smile
+	bool END_OF_GAME = false;
 public:
-	int no_flagged_mines_number;
+	int no_flagged_mines_number; //used in counter of remaining mines
 	game_board(std::string beg_int_exp);
 	game_board(int rows, int columns, int mines_number);
 	~game_board();
@@ -36,6 +37,8 @@ public:
 	field &get_fields(int x_pos, int y_pos){ return fields[x_pos][y_pos]; }
 	void change_victory(){ victory = true; }
 	bool get_victory(){ return victory; }
+	void change_END_OF_GAME(){ END_OF_GAME = true; }
+	bool get_END_OF_GAME(){ return END_OF_GAME; }
 
 	void show_fields();
 };

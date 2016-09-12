@@ -4,6 +4,7 @@
 #include "Resource.h"
 #include <fstream>
 #include <cmath>
+#include "HighScore.h"
 
 #define horizontal_coordinates (horizontal / 2 -  get_window_width() / 2)
 #define vertical_coordinates (vertical / 2 - get_window_height() / 2)
@@ -31,32 +32,17 @@ void clear_old_window_change_its_pos_and_dim(int old_rows, int old_buttons);
 void unpressed_clear_button_normal_face();
 void play_again_or_change_level(std::string again_or_level, std::string level = "", int rows = 0, int columns = 0, int mines = 0);
 void check_if_win();
-void load_HighScores();
-void reset_HighScores();
 void check_and_save_HighScores(int your_time, std::string level);
 void change_skins(std::string skin);
 
 #include <Commctrl.h>
 #pragma comment(lib, "Comctl32.lib")
 
-char b[32];
-
-struct score
-{
-	std::string name;
-	int time;
-};
-
-score HighScores[9];
-
 HBITMAP hbit_BMPs[18];
 
 game_board *g_b_gameboard;
-int gl_g_b_X = 0;
-int gl_g_b_Y = 0;
+HighScore *high_score;
 
-bool END_OF_GAME = false;
-bool Started_TIMER = false;
 HWND hwnd;
 
 HWND **hwnd_matrix;
@@ -65,16 +51,11 @@ HINSTANCE hInstance;
 HBITMAP BitMap; //handle to BitMap
 BITMAP Bitmap_Info; //Structure with informaton about bitmap
 
-unsigned int TIMER = 0;
-//bool FLAG_CLICKED = false;
-//bool GAME_STARTED = true;
-
-TCHAR PlayerName[17];
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	srand(time(NULL));
 	g_b_gameboard = new game_board("Beginner");
+	high_score = new HighScore();
 
 	WNDCLASSEX wc;
 	wc.cbSize = sizeof(WNDCLASSEX);
@@ -133,7 +114,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND_matrix_and_subclassing();
 	unpressed_clear_button_normal_face();
 
-	load_HighScores();
+	high_score->load_HighScores();
 
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
@@ -166,9 +147,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_TIMER:
 	{
-		if (TIMER < 999)
+		if (high_score->get_TIMER() < 999)
 		{
-			TIMER++;
+			high_score->add_one_to_TIMER();
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 	}
@@ -180,9 +161,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		hdcBitmap = CreateCompatibleDC(hdc);
 
 		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
-		BitBlt(hdc, get_window_width() - 73, 8, 18, 20, hdcBitmap, 22 * ((TIMER / 100) % 10) + 2, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
-		BitBlt(hdc, get_window_width() - 55, 8, 18, 20, hdcBitmap, 22 * ((TIMER / 10) % 10) + 2, 0, SRCCOPY);
-		BitBlt(hdc, get_window_width() - 37, 8, 18, 20, hdcBitmap, 22 * (TIMER % 10) + 2, 0, SRCCOPY);
+		BitBlt(hdc, get_window_width() - 73, 8, 18, 20, hdcBitmap, 22 * ((high_score->get_TIMER() / 100) % 10) + 2, 0, SRCCOPY);//Bitmap_Info.bmWidth, Bitmap_Info.bmHeight
+		BitBlt(hdc, get_window_width() - 55, 8, 18, 20, hdcBitmap, 22 * ((high_score->get_TIMER() / 10) % 10) + 2, 0, SRCCOPY);
+		BitBlt(hdc, get_window_width() - 37, 8, 18, 20, hdcBitmap, 22 * (high_score->get_TIMER() % 10) + 2, 0, SRCCOPY);
 
 		//if (GAME_STARTED == true)
 		//{
@@ -215,14 +196,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_LBUTTONDOWN:
-		if (END_OF_GAME == false)
+		if (g_b_gameboard->get_END_OF_GAME() == false)
 		{
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
 		}
 		break;
 
 	case WM_LBUTTONUP:
-		if (END_OF_GAME == false)
+		if (g_b_gameboard->get_END_OF_GAME() == false)
 		{
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 		}
@@ -234,9 +215,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_DESTROY:
 		delete g_b_gameboard;
-		//FLAG_CLICKED = false;
-		//GAME_STARTED = true;
-		Started_TIMER = false;
+		delete high_score;
 		KillTimer(hwnd, ID_TIMER);
 		PostQuitMessage(0);
 		break;
@@ -353,16 +332,16 @@ LRESULT CALLBACK HighScoresProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lP
 		char buffer_for_highscores[6];
 		for (int i = 0; i < 9; i++)
 		{
-			SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
+			SetDlgItemText(hWndDlg, ID_CTRL, high_score->get_i_HighScores_name(i));
 			ID_CTRL += 1;
-			_itoa_s(HighScores[i].time, buffer_for_highscores, 10);
-			if (HighScores[i].time < 10)
+			_itoa_s(high_score->get_i_HighScores_time(i), buffer_for_highscores, 10);
+			if (high_score->get_i_HighScores_time(i) < 10)
 			{
 				buffer_for_highscores[1] = ' ';
 				buffer_for_highscores[2] = 's';
 				buffer_for_highscores[3] = '\0';
 			}
-			else if (HighScores[i].time < 100)
+			else if (high_score->get_i_HighScores_time(i) < 100)
 			{
 				buffer_for_highscores[2] = ' ';
 				buffer_for_highscores[3] = 's';
@@ -392,13 +371,13 @@ LRESULT CALLBACK HighScoresProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lP
 		}
 		case ID_RESET:
 		{
-			reset_HighScores();
+			high_score->reset_HighScores();
 			char buffer_for_highscores[6];
 			for (int i = 0; i < 9; i++)
 			{
-				SetDlgItemText(hWndDlg, ID_CTRL, HighScores[i].name.c_str());
+				SetDlgItemText(hWndDlg, ID_CTRL, high_score->get_i_HighScores_name(i));
 				ID_CTRL += 1;
-				_itoa_s(HighScores[i].time, buffer_for_highscores, 10);
+				_itoa_s(high_score->get_i_HighScores_time(i), buffer_for_highscores, 10);
 				buffer_for_highscores[3] = ' ';
 				buffer_for_highscores[4] = 's';
 				buffer_for_highscores[5] = '\0';
@@ -524,7 +503,7 @@ LRESULT CALLBACK NewScoreProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 		{
 		case ID_OK:
 		{
-			GetWindowText(GetDlgItem(hWndDlg, IDC_NAME), PlayerName, 17);
+			GetWindowText(GetDlgItem(hWndDlg, IDC_NAME), high_score->get_PlayerName(), 17);
 			EndDialog(hWndDlg, NULL);
 			break;
 		}
@@ -545,33 +524,37 @@ LRESULT CALLBACK NewScoreProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 }
 LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
+	int g_b_X = 0;
+	int g_b_Y = 0;
+
 	switch (message)
 	{
 	case WM_LBUTTONDOWN:
-		if (END_OF_GAME == false)
+		if (g_b_gameboard->get_END_OF_GAME() == false)
 		{
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[14]);
 		}
 		return TRUE;
 
 	case WM_LBUTTONUP:
-		if (END_OF_GAME == true)
+		
+		if (g_b_gameboard->get_END_OF_GAME() == true)
 		{
 			break;
 		}
 		else
 		{
-			if (Started_TIMER == false)
+			if (high_score->get_Started_TIMER() == false)
 			{
 				SetTimer(hwnd, ID_TIMER, 1000, NULL);
-				Started_TIMER = true;
+				high_score->change_Started_TIMER();
 			}
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //change smile
 
-			gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
-			gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
+			g_b_X = dwRefData / g_b_gameboard->get_columns();
+			g_b_Y = dwRefData % g_b_gameboard->get_columns();
 
-			if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false)
+			if (g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == false)
 				SendMessage(hButton, BM_SETSTATE, TRUE, NULL);
 
 			/*_itoa_s(dwRefData, b, 10);
@@ -581,21 +564,21 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			MessageBox(hButton, b, "Y", MB_OK);*/
 
 
-			if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered == false && g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false) //if button wasn't discovered
+			if (g_b_gameboard->get_fields(g_b_X, g_b_Y).discovered == false && g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == false) //if button wasn't discovered
 			{
-				g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered = true;
-				switch (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).value)
+				g_b_gameboard->get_fields(g_b_X, g_b_Y).discovered = true;
+				switch (g_b_gameboard->get_fields(g_b_X, g_b_Y).value)
 				{
 				case -1:
 				{
-					if (END_OF_GAME == false)
+					if (g_b_gameboard->get_END_OF_GAME() == false)
 					{
-						Started_TIMER = false;
+						//Started_TIMER = false;
 						//GAME_STARTED = true;
 						//FLAG_CLICKED = false;
 						KillTimer(hwnd, ID_TIMER);
 						SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
-						g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).last_clicked = true;
+						g_b_gameboard->get_fields(g_b_X, g_b_Y).last_clicked = true;
 						SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
 
 						for (int i = 0; i < g_b_gameboard->get_rows(); i++)
@@ -618,8 +601,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 							}
 						}
-						END_OF_GAME = true;
-						//MessageBox(hButton, "You have discovered mine!", "GAME OVER", MB_OK);
+						g_b_gameboard->change_END_OF_GAME(); //END_OF_GAME=truel;
 					}
 				}
 				break;
@@ -678,27 +660,27 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
 
 		//FLAG_CLICKED = true; //flag has been discovered;
-		if (END_OF_GAME == true)
+		if (g_b_gameboard->get_END_OF_GAME() == true)
 		{
 			break;
 		}
 
-		gl_g_b_X = dwRefData / g_b_gameboard->get_columns();
-		gl_g_b_Y = dwRefData % g_b_gameboard->get_columns();
+		g_b_X = dwRefData / g_b_gameboard->get_columns();
+		g_b_Y = dwRefData % g_b_gameboard->get_columns();
 
 
-		if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == false && g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).discovered == false)
+		if (g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == false && g_b_gameboard->get_fields(g_b_X, g_b_Y).discovered == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]); // set the flag Bitmap when first click
-			g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged = true;
+			g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged = true;
 
 			g_b_gameboard->no_flagged_mines_number--;
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
-		else if (g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged == true && END_OF_GAME == false)
+		else if (g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == true && g_b_gameboard->get_END_OF_GAME() == false)
 		{
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]);
-			g_b_gameboard->get_fields(gl_g_b_X, gl_g_b_Y).flagged = false;
+			g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged = false;
 
 			g_b_gameboard->no_flagged_mines_number++;
 			InvalidateRect(hwnd, NULL, FALSE);
@@ -958,8 +940,9 @@ void unpressed_clear_button_normal_face()
 }
 void play_again_or_change_level(std::string again_or_level, std::string level, int rows, int columns, int mines)
 {
-	TIMER = 0;
-	Started_TIMER = false;
+	//TIMER = 0;
+	//Started_TIMER = false;
+	high_score = new HighScore();
 	KillTimer(hwnd, ID_TIMER);
 	//GAME_STARTED = true;
 	//FLAG_CLICKED = false;
@@ -1004,7 +987,7 @@ void play_again_or_change_level(std::string again_or_level, std::string level, i
 
 		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //normal face
 	}
-	END_OF_GAME = false;
+	//END_OF_GAME = false;
 }
 void check_if_win()
 {
@@ -1021,11 +1004,11 @@ void check_if_win()
 			}
 		}
 	}
-	Started_TIMER = false;
+	//Started_TIMER = false;
 	//GAME_STARTED = true;
 	//FLAG_CLICKED = false;
 	KillTimer(hwnd, ID_TIMER);
-	END_OF_GAME = true;
+	g_b_gameboard->change_END_OF_GAME();
 
 	for (i = 0; i < g_b_gameboard->get_rows(); i++)
 	{
@@ -1039,54 +1022,9 @@ void check_if_win()
 	}
 	SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[15]);
 	g_b_gameboard->change_victory();
-	check_and_save_HighScores(TIMER, g_b_gameboard->get_beg_int_exp_cus());
+	check_and_save_HighScores(high_score->get_TIMER(), g_b_gameboard->get_beg_int_exp_cus());
 }
-void load_HighScores()
-{
-	std::fstream file;
-	file.open("HighScores.txt", std::ios::in);
-	if (!file.is_open())
-	{
-		reset_HighScores();
-	}
-	else
-	{
-		for (int i = 0; i < 9; i++)
-		{
-			if (i % 3 == 0)
-			{
-				file >> HighScores[i].name;
-			}
-			file >> HighScores[i].name;
-			file >> HighScores[i].time;
-		}
-		file.close();
-	}
-}
-void reset_HighScores()
-{
-	std::fstream file;
-	file.open("HighScores.txt", std::ios::out | std::ios::trunc);
-	for (int i = 0; i < 9; i++)
-	{
-		if (i == 0)
-		{
-			file << "Beginner\n";
-		}
-		if (i == 3)
-		{
-			file << "\nIntermediate\n";
-		}
-		if (i == 6)
-		{
-			file << "\nExpert\n";
-		}
-		file << "Anonymous 999\n";
-		HighScores[i].name = "Anonymous";
-		HighScores[i].time = 999;
-	}
-	file.close();
-}
+
 void check_and_save_HighScores(int your_time, std::string level)
 {
 	if (level.compare("Custom") == 0)
@@ -1108,32 +1046,34 @@ void check_and_save_HighScores(int your_time, std::string level)
 		index = 6;
 	}
 
-	if (your_time < HighScores[index].time)
+	if (your_time < high_score->get_i_HighScores_time(index))
 	{
 		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_NEW_SCORE),
 			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
-		HighScores[index + 2].name = HighScores[index + 1].name;
-		HighScores[index + 2].time = HighScores[index + 1].time;
-		HighScores[index + 1].name = HighScores[index].name;
-		HighScores[index + 1].time = HighScores[index].time;
-		HighScores[index].name = PlayerName;
-		HighScores[index].time = your_time;
+		high_score->change_i_HighScores_name(index + 2, index + 1);
+		high_score->change_i_HighScores_time(index + 2, index + 1);
+
+		high_score->change_i_HighScores_name(index + 1, index);
+		high_score->change_i_HighScores_time(index + 1, index);
+
+		high_score->change_i_HighScores_name(index, high_score->get_PlayerName());
+		high_score->change_i_HighScores_time_2(index, your_time);
 	}
-	else if (your_time < HighScores[index + 1].time)
+	else if (your_time < high_score->get_i_HighScores_time(index + 1))
 	{
 		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_NEW_SCORE),
 			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
-		HighScores[index + 2].name = HighScores[index + 1].name;
-		HighScores[index + 2].time = HighScores[index + 1].time;
-		HighScores[index + 1].name = PlayerName;
-		HighScores[index + 1].time = your_time;
+		high_score->change_i_HighScores_name(index + 2, index + 1);
+		high_score->change_i_HighScores_time(index + 2, index + 1);
+		high_score->change_i_HighScores_name(index+1, high_score->get_PlayerName());
+		high_score->change_i_HighScores_time_2(index+1, your_time);
 	}
-	else if (your_time < HighScores[index + 2].time)
+	else if (your_time < high_score->get_i_HighScores_time(index + 2))
 	{
 		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_NEW_SCORE),
 			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
-		HighScores[index + 2].name = PlayerName;
-		HighScores[index + 2].time = your_time;
+		high_score->change_i_HighScores_name(index+2, high_score->get_PlayerName());
+		high_score->change_i_HighScores_time_2(index + 2, your_time);
 	}
 
 	std::fstream file;
@@ -1152,9 +1092,9 @@ void check_and_save_HighScores(int your_time, std::string level)
 		{
 			file << "\nExpert\n";
 		}
-		file << HighScores[i].name;
+		file << high_score->get_i_HighScores_name(i);
 		file << " ";
-		file << HighScores[i].time;
+		file << high_score->get_i_HighScores_time(i);
 		file << "\n";
 	}
 	file.close();
@@ -1165,7 +1105,7 @@ void check_and_save_HighScores(int your_time, std::string level)
 void change_skins(std::string skin)
 {
 	load_BITMAPS_and_ICON(skin);
-	if (END_OF_GAME == false)
+	if (g_b_gameboard->get_END_OF_GAME() == false)
 	{
 		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]);
 	}
