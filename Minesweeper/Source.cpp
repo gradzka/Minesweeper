@@ -503,6 +503,7 @@ LRESULT CALLBACK NewScoreProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 		{
 		case ID_OK:
 		{
+			std::string player_name = high_score->get_PlayerName();
 			GetWindowText(GetDlgItem(hWndDlg, IDC_NAME), high_score->get_PlayerName(), 17);
 			EndDialog(hWndDlg, NULL);
 			break;
@@ -547,7 +548,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			if (high_score->get_Started_TIMER() == false)
 			{
 				SetTimer(hwnd, ID_TIMER, 1000, NULL);
-				high_score->change_Started_TIMER();
+				high_score->change_Started_TIMER_true();
 			}
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //change smile
 
@@ -942,7 +943,9 @@ void play_again_or_change_level(std::string again_or_level, std::string level, i
 {
 	//TIMER = 0;
 	//Started_TIMER = false;
-	high_score = new HighScore();
+	//high_score = new HighScore();
+	high_score->change_Started_TIMER_false();
+	high_score->change_TIMER_false();
 	KillTimer(hwnd, ID_TIMER);
 	//GAME_STARTED = true;
 	//FLAG_CLICKED = false;
@@ -1065,6 +1068,7 @@ void check_and_save_HighScores(int your_time, std::string level)
 			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
 		high_score->change_i_HighScores_name(index + 2, index + 1);
 		high_score->change_i_HighScores_time(index + 2, index + 1);
+
 		high_score->change_i_HighScores_name(index+1, high_score->get_PlayerName());
 		high_score->change_i_HighScores_time_2(index+1, your_time);
 	}

@@ -21,9 +21,11 @@ public:
 	void reset_HighScores();
 	void load_HighScores();
 	bool get_Started_TIMER(){ return Started_TIMER; }
-	void change_Started_TIMER(){ Started_TIMER = true; }
+	void change_Started_TIMER_true(){ Started_TIMER = true; }
+	void change_Started_TIMER_false(){ Started_TIMER = false; }
 	unsigned int get_TIMER(){ return TIMER; }
 	void add_one_to_TIMER(){ TIMER++; }
+	void change_TIMER_false(){ TIMER = false; }
 	LPCTSTR get_i_HighScores_name(int i){ return HighScores[i].name.c_str(); }
 	int get_i_HighScores_time(int i){ return HighScores[i].time; }
 	TCHAR* get_PlayerName(){ return PlayerName; }
