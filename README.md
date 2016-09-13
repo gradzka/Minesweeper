@@ -33,7 +33,8 @@ MIT
 * Robert Kazimierczak
 
 Special thanks for resources used to make skins:
-- Classic Theme & Classic Theme (Grayed) - Black Squirrel - http://www.spriters-resource.com/pc_computer/minesweeper/sheet/19849/
+- Classic Theme & Classic Theme (Grayed) - Black Squirrel
+  - http://www.spriters-resource.com/pc_computer/minesweeper/sheet/19849/
 - Crash Bandicoot - Mr. C, Friedslick6, slawter
   - http://www.spriters-resource.com/playstation/crashbandicoot3warped/sheet/57008/
   - http://www.textures-resource.com/playstation/ps1crash1/sheet/2960/
