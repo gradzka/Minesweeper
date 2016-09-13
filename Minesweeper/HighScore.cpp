@@ -56,3 +56,28 @@ void HighScore::load_HighScores()
 		file.close();
 	}
 }
+void HighScore::save_HighScores()
+{
+	std::fstream file;
+	file.open("HighScores.txt", std::ios::out | std::ios::trunc);
+	for (int i = 0; i < 9; i++)
+	{
+		if (i == 0)
+		{
+			file << "Beginner\n";
+		}
+		if (i == 3)
+		{
+			file << "\nIntermediate\n";
+		}
+		if (i == 6)
+		{
+			file << "\nExpert\n";
+		}
+		file << HighScores[i].name;
+		file << " ";
+		file << HighScores[i].time;
+		file << "\n";
+	}
+	file.close();
+}

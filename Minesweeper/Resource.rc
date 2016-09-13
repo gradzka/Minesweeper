@@ -18,8 +18,9 @@
 			POPUP "&Skins"
 		{
 			MENUITEM "&Classic Theme", 1050, CHECKED
-				MENUITEM "&Crash Bandicoot", 1051,
-				MENUITEM "&Super Mario", 1052
+			MENUITEM "&Classic Theme (Grayed)", 1051
+			MENUITEM "&Crash Bandicoot", 1052
+			MENUITEM "&Super Mario", 1053
 		}
 		MENUITEM SEPARATOR
 			MENUITEM "&Exit", 1007

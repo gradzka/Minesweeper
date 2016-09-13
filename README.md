@@ -32,4 +32,17 @@ MIT
 * Monika Grądzka
 * Robert Kazimierczak
 
-
+Special thanks for resources used to make skins:
+- Classic Theme & Classic Theme (Grayed) - Black Squirrel - http://www.spriters-resource.com/pc_computer/minesweeper/sheet/19849/
+- Crash Bandicoot - Mr. C, Friedslick6, slawter
+  - http://www.spriters-resource.com/playstation/crashbandicoot3warped/sheet/57008/
+  - http://www.textures-resource.com/playstation/ps1crash1/sheet/2960/
+  - http://www.spriters-resource.com/playstation/ctr/sheet/40646/
+  - http://www.spriters-resource.com/playstation/ctr/sheet/40647/
+- Super Mario - fsuarez913, mario, Random Talking Bush, Sonikku, A.J. Nitro
+  - http://www.dafont.com/super-mario-256.font
+  - http://www.spriters-resource.com/nes/supermariobros3/sheet/4237/
+  - http://www.spriters-resource.com/wii_u/mariokart8/sheet/68237/
+  - http://www.spriters-resource.com/snes/supermariobros3/sheet/4307/
+  - http://www.spriters-resource.com/game_boy_advance/mlss/sheet/7545/
+  - http://www.spriters-resource.com/wii_u/supermario3dworld/sheet/69874/

@@ -20,6 +20,7 @@ public:
 	
 	void reset_HighScores();
 	void load_HighScores();
+	void save_HighScores();
 	bool get_Started_TIMER(){ return Started_TIMER; }
 	void change_Started_TIMER_true(){ Started_TIMER = true; }
 	void change_Started_TIMER_false(){ Started_TIMER = false; }

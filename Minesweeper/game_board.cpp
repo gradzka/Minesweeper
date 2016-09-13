@@ -105,7 +105,7 @@ void game_board::rand_mines()
 	int X = 0;
 	int Y = 0;
 
-	char bufor[200];
+	//char bufor[200];
 
 	for (int i = 0; i < mines_number; i++)
 	{

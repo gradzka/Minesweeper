@@ -25,7 +25,7 @@ HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
 void load_BITMAPS_and_ICON(std::string skin);
 void check_neighbours(DWORD_PTR dwRefData);
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y);
-void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string menu_level_1, std::string menu_level_2, std::string menu_level_3);
+void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3);
 void HWND_matrix_and_subclassing();
 void delete_buttons(int old_rows, int old_buttons);
 void clear_old_window_change_its_pos_and_dim(int old_rows, int old_buttons);
@@ -126,7 +126,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	return Communique.wParam;
 }
-
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
@@ -177,18 +176,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		BitBlt(hdc, 22, 6, 15, 23, hdcBitmap, abs(17 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 1, 0, SRCCOPY);
 		BitBlt(hdc, 37, 6, 15, 23, hdcBitmap, abs(17 * (g_b_gameboard->no_flagged_mines_number % 10)) + 1, 0, SRCCOPY);
-		//GAME_STARTED = false;
-		//}
-
-		//if (FLAG_CLICKED == true){
-		//if (g_b_gameboard->no_flagged_mines_number < 0)
-		//{
-		//BitBlt(hdc, 0, 8, 20, 20, hdcBitmap, 22 * 10 + 2, 0, SRCCOPY);
-		//}
-		//BitBlt(hdc, 18, 8, 20, 20, hdcBitmap, abs(22 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 2, 0, SRCCOPY);
-		//BitBlt(hdc, 36, 8, 20, 20, hdcBitmap, abs(22 * (g_b_gameboard->no_flagged_mines_number % 10)) + 2, 0, SRCCOPY);
-		//FLAG_CLICKED = false;
-		//}
 
 		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
 		DeleteDC(hdcBitmap);
@@ -231,21 +218,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1002: //Beginner
 		{
-			uncheck_menu(1003, 1004, 1005, "Intermediate", "Expert", "Custom");
+			uncheck_menu(1003, 1004, 1005);
 			CheckMenuItem(GetMenu(hwnd), 1002, MF_BYCOMMAND | MF_CHECKED);
 			play_again_or_change_level("level", "Beginner");
 			break;
 		}
 		case 1003: //Intermediate
 		{
-			uncheck_menu(1002, 1004, 1005, "Beginner", "Expert", "Custom");
+			uncheck_menu(1002, 1004, 1005);
 			CheckMenuItem(GetMenu(hwnd), 1003, MF_BYCOMMAND | MF_CHECKED);
 			play_again_or_change_level("level", "Intermediate");
 			break;
 		}
 		case 1004: //Expert
 		{
-			uncheck_menu(1002, 1003, 1005, "Beginner", "Intermediate", "Custom");
+			uncheck_menu(1002, 1003, 1005);
 			CheckMenuItem(GetMenu(hwnd), 1004, MF_BYCOMMAND | MF_CHECKED);
 			play_again_or_change_level("level", "Expert");
 			break;
@@ -278,29 +265,38 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_CHECKED);
-			//InvalidateRect(hwnd, NULL, FALSE);
 			change_skins("Classic");
 			break;
 		}
-		case 1051: //Crash Bandicoot
+		case 1051: //Classic Theme (Grayed)
 		{
 			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_CHECKED);
-			//load_BITMAPS_and_ICON("Crash");
-			change_skins("Crash");
+			change_skins("Classic (Grayed)");
 			break;
 		}
-		case 1052: //Super Mario
+		case 1052: //Crash Bandicoot
 		{
 			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_CHECKED);
+			change_skins("Crash");
+			break;
+		}
+		case 1053: //Super Mario
+		{
+			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_CHECKED);
 			change_skins("Mario");
 			break;
 		}
-
 		}
 
 		switch (HIWORD(wParam))
@@ -450,7 +446,7 @@ LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam
 		{
 		case ID_OK:
 		{
-			uncheck_menu(1002, 1003, 1004, "Beginner", "Intermediate", "Expert");
+			uncheck_menu(1002, 1003, 1004);
 			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
 			TCHAR rows_buffer[7];
 			TCHAR columns_buffer[7];
@@ -538,10 +534,9 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 		return TRUE;
 
 	case WM_LBUTTONUP:
-		
 		if (g_b_gameboard->get_END_OF_GAME() == true)
 		{
-			break;
+			return TRUE;
 		}
 		else
 		{
@@ -560,10 +555,6 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 			/*_itoa_s(dwRefData, b, 10);
 			MessageBox(hButton, b, "X", MB_OK);*/
-			/*
-			_itoa_s(gl_g_b_Y, b, 10);
-			MessageBox(hButton, b, "Y", MB_OK);*/
-
 
 			if (g_b_gameboard->get_fields(g_b_X, g_b_Y).discovered == false && g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == false) //if button wasn't discovered
 			{
@@ -571,12 +562,8 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 				switch (g_b_gameboard->get_fields(g_b_X, g_b_Y).value)
 				{
 				case -1:
-				{
 					if (g_b_gameboard->get_END_OF_GAME() == false)
 					{
-						//Started_TIMER = false;
-						//GAME_STARTED = true;
-						//FLAG_CLICKED = false;
 						KillTimer(hwnd, ID_TIMER);
 						SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[11]);
 						g_b_gameboard->get_fields(g_b_X, g_b_Y).last_clicked = true;
@@ -604,8 +591,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 						}
 						g_b_gameboard->change_END_OF_GAME(); //END_OF_GAME=truel;
 					}
-				}
-				break;
+					break;
 				case 0:
 					g_b_gameboard->get_fields(dwRefData / g_b_gameboard->get_columns(), dwRefData % g_b_gameboard->get_columns()).discovered = true;
 					SendMessage(GetDlgItem(hwnd, dwRefData), BM_SETSTATE, TRUE, NULL);
@@ -867,20 +853,11 @@ void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y)
 		break;
 	}
 }
-void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, std::string menu_level_1, std::string menu_level_2, std::string menu_level_3)
+void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3)
 {
-	if (g_b_gameboard->get_beg_int_exp_cus().compare(menu_level_1) == 0)
-	{
-		CheckMenuItem(GetMenu(hwnd), menu_arg_1, MF_BYCOMMAND | MF_UNCHECKED);
-	}
-	else if (g_b_gameboard->get_beg_int_exp_cus().compare(menu_level_2) == 0)
-	{
-		CheckMenuItem(GetMenu(hwnd), menu_arg_2, MF_BYCOMMAND | MF_UNCHECKED);
-	}
-	else if (g_b_gameboard->get_beg_int_exp_cus().compare(menu_level_3) == 0)
-	{
-		CheckMenuItem(GetMenu(hwnd), menu_arg_3, MF_BYCOMMAND | MF_UNCHECKED);
-	}
+	CheckMenuItem(GetMenu(hwnd), menu_arg_1, MF_BYCOMMAND | MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hwnd), menu_arg_2, MF_BYCOMMAND | MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hwnd), menu_arg_3, MF_BYCOMMAND | MF_UNCHECKED);
 }
 void HWND_matrix_and_subclassing()
 {
@@ -941,14 +918,9 @@ void unpressed_clear_button_normal_face()
 }
 void play_again_or_change_level(std::string again_or_level, std::string level, int rows, int columns, int mines)
 {
-	//TIMER = 0;
-	//Started_TIMER = false;
-	//high_score = new HighScore();
 	high_score->change_Started_TIMER_false();
 	high_score->change_TIMER_false();
 	KillTimer(hwnd, ID_TIMER);
-	//GAME_STARTED = true;
-	//FLAG_CLICKED = false;
 
 	if (again_or_level.compare("again") == 0)
 	{
@@ -990,7 +962,6 @@ void play_again_or_change_level(std::string again_or_level, std::string level, i
 
 		SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[12]); //normal face
 	}
-	//END_OF_GAME = false;
 }
 void check_if_win()
 {
@@ -1007,9 +978,7 @@ void check_if_win()
 			}
 		}
 	}
-	//Started_TIMER = false;
-	//GAME_STARTED = true;
-	//FLAG_CLICKED = false;
+
 	KillTimer(hwnd, ID_TIMER);
 	g_b_gameboard->change_END_OF_GAME();
 
@@ -1060,6 +1029,8 @@ void check_and_save_HighScores(int your_time, std::string level)
 
 		high_score->change_i_HighScores_name(index, high_score->get_PlayerName());
 		high_score->change_i_HighScores_time_2(index, your_time);
+
+		high_score->save_HighScores();
 		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
 			hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 	}
@@ -1072,6 +1043,8 @@ void check_and_save_HighScores(int your_time, std::string level)
 
 		high_score->change_i_HighScores_name(index+1, high_score->get_PlayerName());
 		high_score->change_i_HighScores_time_2(index+1, your_time);
+
+		high_score->save_HighScores();
 		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
 			hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 	}
@@ -1081,32 +1054,11 @@ void check_and_save_HighScores(int your_time, std::string level)
 			hwnd, reinterpret_cast<DLGPROC>(NewScoreProc));
 		high_score->change_i_HighScores_name(index+2, high_score->get_PlayerName());
 		high_score->change_i_HighScores_time_2(index + 2, your_time);
+
+		high_score->save_HighScores();
 		DialogBox(hInstance, MAKEINTRESOURCE(IDD_DLG_HIGHSCORES),
 			hwnd, reinterpret_cast<DLGPROC>(HighScoresProc));
 	}
-
-	std::fstream file;
-	file.open("HighScores.txt", std::ios::out | std::ios::trunc);
-	for (int i = 0; i < 9; i++)
-	{
-		if (i == 0)
-		{
-			file << "Beginner\n";
-		}
-		if (i == 3)
-		{
-			file << "\nIntermediate\n";
-		}
-		if (i == 6)
-		{
-			file << "\nExpert\n";
-		}
-		file << high_score->get_i_HighScores_name(i);
-		file << " ";
-		file << high_score->get_i_HighScores_time(i);
-		file << "\n";
-	}
-	file.close();
 }
 void change_skins(std::string skin)
 {
@@ -1126,13 +1078,14 @@ void change_skins(std::string skin)
 			SendMessage(GetDlgItem(hwnd, -1), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[13]);
 		}
 	}
+
 	for (int i = 0; i < g_b_gameboard->get_rows(); i++)
 	{
 		for (int j = 0; j < g_b_gameboard->get_columns(); j++)
 		{
 			if (g_b_gameboard->get_fields(i, j).flagged == true)
 			{
-				if (g_b_gameboard->get_fields(i, j).value + 1 != 0)
+				if (g_b_gameboard->get_fields(i, j).value + 1 != 0 && g_b_gameboard->get_END_OF_GAME() == true)
 				{
 					SendMessage(GetDlgItem(hwnd, i*g_b_gameboard->get_columns() + j), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[10]);
 				}
