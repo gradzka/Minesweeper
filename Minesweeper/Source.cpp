@@ -25,7 +25,7 @@ HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance);
 void load_BITMAPS_and_ICON(std::string skin);
 void check_neighbours(DWORD_PTR dwRefData);
 void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y);
-void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3);
+void uncheck_3_first_check_last_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, UINT menu_arg_4);
 void HWND_matrix_and_subclassing();
 void delete_buttons(int old_rows, int old_buttons);
 void clear_old_window_change_its_pos_and_dim(int old_rows, int old_buttons);
@@ -49,7 +49,7 @@ HWND **hwnd_matrix;
 HINSTANCE hInstance;
 
 HBITMAP BitMap; //handle to BitMap
-BITMAP Bitmap_Info; //Structure with informaton about bitmap
+//BITMAP Bitmap_Info; //Structure with informaton about bitmap
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -129,8 +129,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
-	HDC hdcBitmap; //zmienne na 2 konteksty
+	HDC hdcBitmap;
 	PAINTSTRUCT ps;
+
 	switch (msg)
 	{
 	case WM_KEYDOWN:
@@ -164,9 +165,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		BitBlt(hdc, get_window_width() - 54, 6, 15, 23, hdcBitmap, 17 * ((high_score->get_TIMER() / 10) % 10) + 1, 0, SRCCOPY);
 		BitBlt(hdc, get_window_width() - 39, 6, 15, 23, hdcBitmap, 17 * (high_score->get_TIMER() % 10) + 1, 0, SRCCOPY);
 
-		//if (GAME_STARTED == true)
-		//{
-		if (g_b_gameboard->no_flagged_mines_number >= 0)
+		if (g_b_gameboard->get_no_flagged_mines_number() >= 0)
 		{
 			BitBlt(hdc, 7, 6, 15, 23, hdcBitmap, 1, 0, SRCCOPY);
 		}
@@ -174,8 +173,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			BitBlt(hdc, 7, 6, 15, 23, hdcBitmap, 17 * 10 + 1, 0, SRCCOPY);
 		}
-		BitBlt(hdc, 22, 6, 15, 23, hdcBitmap, abs(17 * ((g_b_gameboard->no_flagged_mines_number / 10) % 10)) + 1, 0, SRCCOPY);
-		BitBlt(hdc, 37, 6, 15, 23, hdcBitmap, abs(17 * (g_b_gameboard->no_flagged_mines_number % 10)) + 1, 0, SRCCOPY);
+		BitBlt(hdc, 22, 6, 15, 23, hdcBitmap, abs(17 * ((g_b_gameboard->get_no_flagged_mines_number() / 10) % 10)) + 1, 0, SRCCOPY);
+		BitBlt(hdc, 37, 6, 15, 23, hdcBitmap, abs(17 * (g_b_gameboard->get_no_flagged_mines_number() % 10)) + 1, 0, SRCCOPY);
 
 		BitMap = (HBITMAP)SelectObject(hdcBitmap, BitMap);
 		DeleteDC(hdcBitmap);
@@ -218,22 +217,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case 1002: //Beginner
 		{
-			uncheck_menu(1003, 1004, 1005);
-			CheckMenuItem(GetMenu(hwnd), 1002, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1003, 1004, 1005,1002);
 			play_again_or_change_level("level", "Beginner");
 			break;
 		}
 		case 1003: //Intermediate
 		{
-			uncheck_menu(1002, 1004, 1005);
-			CheckMenuItem(GetMenu(hwnd), 1003, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1002, 1004, 1005, 1003);
 			play_again_or_change_level("level", "Intermediate");
 			break;
 		}
 		case 1004: //Expert
 		{
-			uncheck_menu(1002, 1003, 1005);
-			CheckMenuItem(GetMenu(hwnd), 1004, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1002, 1003, 1005,1004);
 			play_again_or_change_level("level", "Expert");
 			break;
 		}
@@ -263,37 +259,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		//Skins
 		case 1050: //Classic Theme
 		{
-			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1051, 1052, 1053, 1050);
 			change_skins("Classic");
 			break;
 		}
 		case 1051: //Classic Theme (Grayed)
 		{
-			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1050, 1052, 1053, 1051);
 			change_skins("Classic (Grayed)");
 			break;
 		}
 		case 1052: //Crash Bandicoot
 		{
-			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1050, 1051, 1053, 1052);
 			change_skins("Crash");
 			break;
 		}
 		case 1053: //Super Mario
 		{
-			CheckMenuItem(GetMenu(hwnd), 1050, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1051, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1052, MF_BYCOMMAND | MF_UNCHECKED);
-			CheckMenuItem(GetMenu(hwnd), 1053, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1050, 1051, 1052, 1053);
 			change_skins("Mario");
 			break;
 		}
@@ -357,7 +341,6 @@ LRESULT CALLBACK HighScoresProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lP
 
 	case WM_COMMAND:
 	{
-		// reakcja na przyciski
 		switch (LOWORD(wParam))
 		{
 		case ID_OK:
@@ -387,7 +370,7 @@ LRESULT CALLBACK HighScoresProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lP
 	}
 	case WM_CLOSE:
 	{
-		EndDialog(hWndDlg, NULL); //NULL - value to return
+		EndDialog(hWndDlg, NULL);
 		break;
 	}
 	break;
@@ -406,7 +389,6 @@ LRESULT CALLBACK AboutProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_COMMAND:
 	{
-		// reakcja na przyciski
 		switch (LOWORD(wParam))
 		{
 		case ID_OK:
@@ -419,7 +401,7 @@ LRESULT CALLBACK AboutProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_CLOSE:
 	{
-		EndDialog(hWndDlg, NULL); //NULL - value to return
+		EndDialog(hWndDlg, NULL);
 		break;
 	}
 	break;
@@ -441,13 +423,11 @@ LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam
 
 	case WM_COMMAND:
 	{
-		// reakcja na przyciski
 		switch (LOWORD(wParam))
 		{
 		case ID_OK:
 		{
-			uncheck_menu(1002, 1003, 1004);
-			CheckMenuItem(GetMenu(hwnd), 1005, MF_BYCOMMAND | MF_CHECKED);
+			uncheck_3_first_check_last_menu(1002, 1003, 1004,1005);
 			TCHAR rows_buffer[7];
 			TCHAR columns_buffer[7];
 			TCHAR mines_buffer[7];
@@ -468,7 +448,7 @@ LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam
 	}
 	case WM_CLOSE:
 	{
-		EndDialog(hWndDlg, NULL); //NULL - value to return
+		EndDialog(hWndDlg, NULL);
 		break;
 	}
 	break;
@@ -494,7 +474,6 @@ LRESULT CALLBACK NewScoreProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 
 	case WM_COMMAND:
 	{
-		// reakcja na przyciski
 		switch (LOWORD(wParam))
 		{
 		case ID_OK:
@@ -509,7 +488,7 @@ LRESULT CALLBACK NewScoreProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 	}
 	case WM_CLOSE:
 	{
-		EndDialog(hWndDlg, NULL); //NULL - value to return
+		EndDialog(hWndDlg, NULL);
 		break;
 	}
 	break;
@@ -553,9 +532,6 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			if (g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == false)
 				SendMessage(hButton, BM_SETSTATE, TRUE, NULL);
 
-			/*_itoa_s(dwRefData, b, 10);
-			MessageBox(hButton, b, "X", MB_OK);*/
-
 			if (g_b_gameboard->get_fields(g_b_X, g_b_Y).discovered == false && g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == false) //if button wasn't discovered
 			{
 				g_b_gameboard->get_fields(g_b_X, g_b_Y).discovered = true;
@@ -589,7 +565,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 							}
 						}
-						g_b_gameboard->change_END_OF_GAME(); //END_OF_GAME=truel;
+						g_b_gameboard->change_END_OF_GAME(); //END_OF_GAME=true;
 					}
 					break;
 				case 0:
@@ -642,11 +618,6 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 
 		//When Right Button is released
 	case WM_RBUTTONUP:
-		// Mouse button right-click event handler
-		/*_itoa_s(dwRefData, b, 10);
-		MessageBox(hButton, b, "Subclass Example - WM_RBUTTONUP", MB_OK);*/
-
-		//FLAG_CLICKED = true; //flag has been discovered;
 		if (g_b_gameboard->get_END_OF_GAME() == true)
 		{
 			break;
@@ -661,7 +632,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[17]); // set the flag Bitmap when first click
 			g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged = true;
 
-			g_b_gameboard->no_flagged_mines_number--;
+			g_b_gameboard->substract_one_from_no_flagged_mines_number();
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		else if (g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged == true && g_b_gameboard->get_END_OF_GAME() == false)
@@ -669,7 +640,7 @@ LRESULT CALLBACK NewSafeBtnProc(HWND hButton, UINT message, WPARAM wParam, LPARA
 			SendMessage(hButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit_BMPs[16]);
 			g_b_gameboard->get_fields(g_b_X, g_b_Y).flagged = false;
 
-			g_b_gameboard->no_flagged_mines_number++;
+			g_b_gameboard->add_one_to_no_flagged_mines_number();
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		return TRUE;
@@ -721,7 +692,7 @@ void GetDesktopResolution(int &horizontal, int &vertical)
 HWND **get_hwnd_matrix(HWND hwnd, HINSTANCE hInstance)
 {
 	int button_number = 0;
-	//HWND matrix
+
 	HWND **hwnd_matrix = new HWND *[g_b_gameboard->get_rows()];
 
 	for (int i = 0; i < g_b_gameboard->get_rows(); i++)
@@ -759,7 +730,7 @@ void load_BITMAPS_and_ICON(std::string skin)
 	{
 		MessageBox(0, "There's problem with open \"Digits.bmp\"", "No File", MB_ICONERROR);
 	}
-	GetObject(BitMap, sizeof(BITMAP), &Bitmap_Info);
+	//GetObject(BitMap, sizeof(BITMAP), &Bitmap_Info); //Get info about Bitmap
 }
 void check_neighbours(DWORD_PTR dwRefData)
 {
@@ -853,11 +824,12 @@ void neighbour_value(DWORD_PTR dwRefData, int g_b_X, int g_b_Y)
 		break;
 	}
 }
-void uncheck_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3)
+void uncheck_3_first_check_last_menu(UINT menu_arg_1, UINT menu_arg_2, UINT menu_arg_3, UINT menu_arg_4)
 {
 	CheckMenuItem(GetMenu(hwnd), menu_arg_1, MF_BYCOMMAND | MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hwnd), menu_arg_2, MF_BYCOMMAND | MF_UNCHECKED);
 	CheckMenuItem(GetMenu(hwnd), menu_arg_3, MF_BYCOMMAND | MF_UNCHECKED);
+	CheckMenuItem(GetMenu(hwnd), menu_arg_4, MF_BYCOMMAND | MF_CHECKED);
 }
 void HWND_matrix_and_subclassing()
 {

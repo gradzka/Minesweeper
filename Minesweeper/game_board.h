@@ -24,8 +24,8 @@ private:
 	void neighbours_mines(); //change neighbour mines fields with proper value
 	bool victory = false; //variable used to change or not main smile
 	bool END_OF_GAME = false;
-public:
 	int no_flagged_mines_number; //used in counter of remaining mines
+public:	
 	game_board(std::string beg_int_exp);
 	game_board(int rows, int columns, int mines_number);
 	~game_board();
@@ -39,18 +39,8 @@ public:
 	bool get_victory(){ return victory; }
 	void change_END_OF_GAME(){ END_OF_GAME = true; }
 	bool get_END_OF_GAME(){ return END_OF_GAME; }
-
 	void show_fields();
+	int get_no_flagged_mines_number(){ return no_flagged_mines_number; }
+	void add_one_to_no_flagged_mines_number(){ no_flagged_mines_number++; }
+	void substract_one_from_no_flagged_mines_number(){ no_flagged_mines_number--; }
 };
-
-/*
-int main()
-{
-//game_board *g_b = new game_board("Beginner");
-game_board *g_b = new game_board(10,10,82);
-g_b->show_fields();
-delete g_b;
-system("PAUSE");
-return 0;
-}
-*/

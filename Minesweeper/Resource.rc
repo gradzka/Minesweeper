@@ -31,35 +31,35 @@
 	}
 }
 
-// //DIALOG BOX HIGHSCORES
+//DIALOG BOX HIGHSCORES
 IDD_DLG_HIGHSCORES DIALOGEX 0, 0, 310, 75
 STYLE DS_CENTER | WS_SYSMENU
 CAPTION "High Scores..."
 FONT 9, "Courier New", 0, 0, 0x0
 BEGIN
 CTEXT           "BEGINNER", ID_BEG, 10, 5, 100, 10
-LTEXT           "", ID_BEG1, 10, 18, 70, 10
-RTEXT           "", ID_BEG1_TIME, 80, 18, 20, 10
-LTEXT           "", ID_BEG2, 10, 28, 70, 10
-RTEXT           "", ID_BEG2_TIME, 80, 28, 20, 10
-LTEXT           "", ID_BEG3, 10, 38, 70, 10
-RTEXT           "", ID_BEG3_TIME, 80, 38, 20, 10
+LTEXT           "", 1016, 10, 18, 70, 10 //1016-ID_BEG1
+RTEXT           "", 1017, 80, 18, 20, 10 //ID_BEG1_TIME
+LTEXT           "", 1018, 10, 28, 70, 10 //ID_BEG2
+RTEXT           "", 1019, 80, 28, 20, 10 //ID_BEG2_TIME
+LTEXT           "", 1020, 10, 38, 70, 10 //ID_BEG3
+RTEXT           "", 1021, 80, 38, 20, 10 //ID_BEG3_TIME
 
 CTEXT           "INTERMEDIATE", ID_INT, 110, 5, 100, 10
-LTEXT           "", ID_INT1, 110, 18, 70, 10
-RTEXT           "", ID_INT1_TIME, 180, 18, 20, 10
-LTEXT           "", ID_INT2, 110, 28, 70, 10
-RTEXT           "", ID_INT2_TIME, 180, 28, 20, 10
-LTEXT           "", ID_INT3, 110, 38, 70, 10
-RTEXT           "", ID_INT3_TIME, 180, 38, 20, 10
+LTEXT           "", 1022, 110, 18, 70, 10 //ID_INT1
+RTEXT           "", 1023, 180, 18, 20, 10 //ID_INT1_TIME
+LTEXT           "", 1024, 110, 28, 70, 10 //ID_INT2
+RTEXT           "", 1025, 180, 28, 20, 10 //ID_INT2_TIME
+LTEXT           "", 1026, 110, 38, 70, 10 //ID_INT3
+RTEXT           "", 1027, 180, 38, 20, 10 //ID_INT3_TIME
 
 CTEXT           "EXPERT", ID_EXP, 210, 5, 100, 10
-LTEXT           "", ID_EXP1, 210, 18, 70, 10
-RTEXT           "", ID_EXP1_TIME, 280, 18, 20, 10
-LTEXT           "", ID_EXP2, 210, 28, 70, 10
-RTEXT           "", ID_EXP2_TIME, 280, 28, 20, 10
-LTEXT           "", ID_EXP3, 210, 38, 70, 10
-RTEXT           "", ID_EXP3_TIME, 280, 38, 20, 10
+LTEXT           "", 1028, 210, 18, 70, 10 //ID_EXP1
+RTEXT           "", 1029, 280, 18, 20, 10 //ID_EXP1_TIME
+LTEXT           "", 1030, 210, 28, 70, 10 //ID_EXP2
+RTEXT           "", 1031, 280, 28, 20, 10 //ID_EXP2_TIME
+LTEXT           "", 1032, 210, 38, 70, 10 //ID_EXP3
+RTEXT           "", 1033, 280, 38, 20, 10 //ID_EXP3_TIME
 
 DEFPUSHBUTTON   "Reset...", ID_RESET, 93, 52, 50, 14
 DEFPUSHBUTTON   "OK", ID_OK, 165, 52, 50, 14
@@ -92,7 +92,7 @@ EDITTEXT		IDC_COLUMNS_T, 45, 30, 28, 10, ES_NUMBER
 EDITTEXT		IDC_MINES_T, 45, 42, 28, 10, ES_NUMBER
 END
 
-//DIALOG BOX New HIGH SCORE
+//DIALOG BOX NEW HIGH SCORE
 IDD_DLG_NEW_SCORE DIALOGEX 0, 0, 140, 90
 STYLE WS_POPUPWINDOW | DS_CENTER
 FONT 9, "Courier New", 0, 0, 0x0
