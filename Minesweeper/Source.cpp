@@ -413,12 +413,17 @@ LRESULT CALLBACK AboutProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 LRESULT CALLBACK CustomProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+		
 	switch (Msg)
 	{
 	case WM_INITDIALOG:
-		SetWindowText(GetDlgItem(hWndDlg, IDC_ROWS_T), "9");
-		SetWindowText(GetDlgItem(hWndDlg, IDC_COLUMNS_T), "9");
-		SetWindowText(GetDlgItem(hWndDlg, IDC_MINES_T), "10");
+		char help_buffer[4];
+		_itoa_s(g_b_gameboard->get_rows(), help_buffer, 4, 10);
+		SetWindowText(GetDlgItem(hWndDlg, IDC_ROWS_T), help_buffer);
+		_itoa_s(g_b_gameboard->get_columns(), help_buffer, 4, 10);
+		SetWindowText(GetDlgItem(hWndDlg, IDC_COLUMNS_T), help_buffer);
+		_itoa_s(g_b_gameboard->get_mines_number(), help_buffer, 4, 10);
+		SetWindowText(GetDlgItem(hWndDlg, IDC_MINES_T), help_buffer);
 		return TRUE;
 
 	case WM_COMMAND:

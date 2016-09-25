@@ -9,8 +9,6 @@ The foundation of this project is game_board class. It provides e.g. rand_mines(
 
 One of the most interesting points is check_neighbours(...) procedure, which check the value of neighbouring fields using recursion. What is more, subclassing is used.
 
-To speed up game for large boards, omp was used.
-
 ##Tools
 - Microsoft Visual Studio 2013
 - WinAPI
