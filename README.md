@@ -1,29 +1,26 @@
 # Minesweeper
 Minesweeper game for Windows
 
-##Overview
+## Overview
 The main aim of this project is recreating the popular game. Player can choose between skins: Classic, Grayed, Crash Bandicoot and Super Mario.
 
-##Description
+## Description
 The foundation of this project is game_board class. It provides e.g. rand_mines() method, which fills the proper matrix with radomly placed mines, neighbours_mines(), which changes neighbouring mines with proper value in fields matrix, where one field has flags: value, flagged, discovered, last_clicked.
 
 One of the most interesting points is check_neighbours(...) procedure, which check the value of neighbouring fields using recursion. What is more, subclassing is used.
 
-##Tools
+## Tools
 - Microsoft Visual Studio 2013
 - WinAPI
 
-##Attributions
+## Attributions
 - http://stackoverflow.com/questions/8690619/how-to-get-screen-resolution-in-c
 - https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
 - http://cpp0x.pl/kursy/Kurs-WinAPI-C++/167
 - http://www.functionx.com/win32/Lesson04.htm
 - http://stackoverflow.com/questions/5690333/get-text-from-an-edit-control
 
-##License
-MIT
-
-##Credits
+## Credits
 * Monika Grądzka
 * Robert Kazimierczak
 
