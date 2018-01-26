@@ -13,6 +13,13 @@ One of the most interesting points is check_neighbours(...) procedure, which che
 - Microsoft Visual Studio 2013
 - WinAPI
 
+## Selected application windows
+<p align="center"><img src="https://github.com/kazimierczak-robert/Minesweeper/blob/master/Screenshots/Skins.png"></p>
+<p align="center"><em>Figure 1. Settings</em></p>
+
+<p align="center"><img src="https://github.com/kazimierczak-robert/Minesweeper/blob/master/Screenshots/Themes.png"></p>
+<p align="center"><em>Figure 2. Available skins</em></p>  
+
 ## Attributions
 - http://stackoverflow.com/questions/8690619/how-to-get-screen-resolution-in-c
 - https://code.msdn.microsoft.com/windowsapps/CppWindowsSubclassing-2ef7ee53
